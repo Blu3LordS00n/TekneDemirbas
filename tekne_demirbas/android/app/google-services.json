@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "420256405072",
+    "project_id": "teknedemirbas",
+    "storage_bucket": "teknedemirbas.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:420256405072:android:e11ac53878dc8a38812355",
+        "android_client_info": {
+          "package_name": "com.example.tekne_demirbas"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABEzliYeozua5Yrs4Ih6c4zzM7Xwnw2v0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
