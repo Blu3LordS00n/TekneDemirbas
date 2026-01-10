@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
+import 'package:tekne_demirbas/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:tekne_demirbas/features/authentication/presentation/widgets/common_text_field.dart';
 import 'package:tekne_demirbas/routes/routes.dart';
 import 'package:tekne_demirbas/utils/appstyles.dart';
@@ -17,6 +19,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailEditingController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  void _validateDetails() {
+    String email = _emailEditingController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Mail ya da sifre alanı bos kalmamalı!',
+            style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ref
+          .read(authControllerProvider.notifier)
+          .signInWithEmailAndPassword(email: email, password: password);
+    }
+  }
+
+  @override
   void dispose() {
     _emailEditingController.dispose();
     _passwordController.dispose();
@@ -27,6 +51,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
+
+    final state = ref.watch(authControllerProvider);
+
+    ref.listen<AsyncValue>(authControllerProvider, (_, state) {
+      state.showAlertDialogOnError(context);
+    });
+
     return SafeArea(
       child: Scaffold(
         body: Padding(
@@ -57,7 +88,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 SizedBox(height: SizeConfig.getProportionateHeight(25)),
 
                 InkWell(
-                  onTap: () {},
+                  onTap: _validateDetails,
                   child: Container(
                     alignment: Alignment.center,
                     height: SizeConfig.getProportionateHeight(50),
@@ -66,13 +97,15 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       color: const Color.fromARGB(255, 43, 253, 2),
                       borderRadius: BorderRadius.circular(20.0),
                     ),
-                    child: Text(
-                      'Giris yap!',
-                      style: Appstyles.normalTextStyle.copyWith(
-                        color: Colors.white,
-                        fontSize: SizeConfig.getProportionateHeight(20),
-                      ),
-                    ),
+                    child: state.isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            'Giris yap',
+                            style: Appstyles.normalTextStyle.copyWith(
+                              color: Colors.white,
+                              fontSize: SizeConfig.getProportionateHeight(20),
+                            ),
+                          ),
                   ),
                 ),
                 SizedBox(height: SizeConfig.getProportionateHeight(10)),

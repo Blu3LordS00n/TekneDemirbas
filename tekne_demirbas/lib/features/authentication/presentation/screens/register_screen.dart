@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
+import 'package:tekne_demirbas/features/authentication/presentation/controllers/auth_controller.dart';
+import 'package:tekne_demirbas/features/authentication/presentation/widgets/common_text_field.dart';
+import 'package:tekne_demirbas/routes/routes.dart';
+import 'package:tekne_demirbas/utils/appstyles.dart';
+import 'package:tekne_demirbas/utils/size_config.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -8,8 +16,162 @@ class RegisterScreen extends ConsumerStatefulWidget {
 }
 
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  final _emailEditingController = TextEditingController();
+  final _passwordController = TextEditingController();
+
+  void _validateDetails() {
+    String email = _emailEditingController.text.trim();
+    String password = _passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Mail ya da sifre alanı bos kalmamalı!',
+            style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      ref
+          .read(authControllerProvider.notifier)
+          .createUserWithEmailAndPassword(email: email, password: password);
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailEditingController.dispose();
+    _passwordController.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: AppBar(title: Text('Register!')));
+    SizeConfig.init(context);
+    final state = ref.watch(authControllerProvider);
+
+    ref.listen<AsyncValue>(authControllerProvider, (_, state) {
+      state.showAlertDialogOnError(context);
+    });
+
+    return SafeArea(
+      child: Scaffold(
+        body: Padding(
+          padding: EdgeInsets.fromLTRB(
+            SizeConfig.getProportionateWidth(10),
+            SizeConfig.getProportionateHeight(50),
+            SizeConfig.getProportionateWidth(10),
+            0,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                Text('Hesap Olustur', style: Appstyles.titleTextStyle),
+                SizedBox(height: SizeConfig.getProportionateHeight(25)),
+                CommonTextField(
+                  hintText: 'Mail adresi',
+                  textInputType: TextInputType.emailAddress,
+                  obscureText: false,
+                  controller: _emailEditingController,
+                ),
+                SizedBox(height: SizeConfig.getProportionateHeight(10)),
+                CommonTextField(
+                  hintText: 'Sifre',
+                  textInputType: TextInputType.text,
+                  obscureText: true,
+                  controller: _passwordController,
+                ),
+                SizedBox(height: SizeConfig.getProportionateHeight(25)),
+
+                InkWell(
+                  onTap: _validateDetails,
+                  child: Container(
+                    alignment: Alignment.center,
+                    height: SizeConfig.getProportionateHeight(50),
+                    width: SizeConfig.screenWidth,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 43, 253, 2),
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: state.isLoading
+                        ? const CircularProgressIndicator()
+                        : Text(
+                            'Kayıt ol',
+                            style: Appstyles.normalTextStyle.copyWith(
+                              color: Colors.white,
+                              fontSize: SizeConfig.getProportionateHeight(20),
+                            ),
+                          ),
+                  ),
+                ),
+                SizedBox(height: SizeConfig.getProportionateHeight(10)),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: SizeConfig.getProportionateHeight(1),
+                      width: SizeConfig.screenWidth * 0.4,
+                      decoration: BoxDecoration(color: Colors.grey),
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateWidth(5)),
+                    Text('OR', style: Appstyles.normalTextStyle),
+                    Container(
+                      height: SizeConfig.getProportionateWidth(1),
+                      width: SizeConfig.screenWidth * 0.4,
+                      decoration: BoxDecoration(color: Colors.grey),
+                    ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.getProportionateHeight(10)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: SizeConfig.getProportionateHeight(40),
+                      width: SizeConfig.screenWidth * 0.75,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: Colors.black,
+                          style: BorderStyle.solid,
+                          width: 2,
+                        ),
+                      ),
+                      child: const FaIcon(
+                        FontAwesomeIcons.google,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: SizeConfig.getProportionateHeight(40)),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text('Hesabın var mı?', style: Appstyles.normalTextStyle),
+                    GestureDetector(
+                      onTap: () {
+                        context.goNamed(AppRoutes.signIn.name);
+                      },
+                      child: Text(
+                        ' Giris yap!',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          color: Colors.blue,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
