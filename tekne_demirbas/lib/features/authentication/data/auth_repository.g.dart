@@ -84,11 +84,11 @@ final class AuthStateChangesProvider
 String _$authStateChangesHash() => r'e0ba298df256aa0e5c67aded5bc4dcbe1a433cdf';
 
 @ProviderFor(currentUesr)
-final currentUesrProvider = CurrentUesrProvider._();
+final currentUserProvider = CurrentUserProvider._();
 
-final class CurrentUesrProvider extends $FunctionalProvider<User?, User?, User?>
+final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
     with $Provider<User?> {
-  CurrentUesrProvider._()
+  CurrentUserProvider._()
     : super(
         from: null,
         argument: null,

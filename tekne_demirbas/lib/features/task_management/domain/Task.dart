@@ -2,19 +2,19 @@ class Task {
   final String id;
   final String title;
   final String description;
-  final String jobType;
+  final String taskType;
   final String boatType;
-  final DateTime date;
+  final String date;
   final bool isComplete;
 
   const Task({
-    required this.id,
+    this.id = '',
     required this.title,
     required this.description,
-    required this.jobType,
+    required this.taskType,
     required this.boatType,
     required this.date,
-    required this.isComplete,
+    this.isComplete = false,
   });
 
   factory Task.fromMap(Map<String, dynamic> map, String id) {
@@ -22,9 +22,9 @@ class Task {
       id: id,
       title: map['title'] ?? '',
       description: map['description'] ?? '',
-      jobType: map['jobType'] ?? '',
+      taskType: map['taskType'] ?? '',
       boatType: map['boatType'] ?? '',
-      date: DateTime.parse(map['date']),
+      date: map['date'] ?? '',
       isComplete: map['isComplete'] ?? false,
     );
   }
@@ -33,9 +33,9 @@ class Task {
     return {
       'title': title,
       'description': description,
-      'jobType': jobType,
+      'taskType': taskType,
       'boatType': boatType,
-      'date': date.toIso8601String(),
+      'date': date, // 🔹 direkt string
       'isComplete': isComplete,
     };
   }
@@ -44,16 +44,16 @@ class Task {
     String? id,
     String? title,
     String? description,
-    String? jobType,
+    String? taskType,
     String? boatType,
-    DateTime? date,
+    String? date,
     bool? isComplete,
   }) {
     return Task(
       id: id ?? this.id,
       title: title ?? this.title,
       description: description ?? this.description,
-      jobType: jobType ?? this.jobType,
+      taskType: taskType ?? this.taskType,
       boatType: boatType ?? this.boatType,
       date: date ?? this.date,
       isComplete: isComplete ?? this.isComplete,
@@ -68,7 +68,7 @@ class Task {
         other.id == id &&
         other.title == title &&
         other.description == description &&
-        other.jobType == jobType &&
+        other.taskType == taskType &&
         other.boatType == boatType &&
         other.date == date &&
         other.isComplete == isComplete;
@@ -79,7 +79,7 @@ class Task {
     return id.hashCode ^
         title.hashCode ^
         description.hashCode ^
-        jobType.hashCode ^
+        taskType.hashCode ^
         boatType.hashCode ^
         date.hashCode ^
         isComplete.hashCode;
@@ -91,7 +91,7 @@ class Task {
         'id: $id, '
         'title: $title, '
         'description: $description, '
-        'jobType: $jobType, '
+        'taskType: $taskType, '
         'boatType: $boatType, '
         'date: $date, '
         'isComplete: $isComplete'

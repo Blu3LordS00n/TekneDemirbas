@@ -88,7 +88,20 @@ FirestoreRepository firestoreRepository(Ref ref) {
   return FirestoreRepository(FirebaseFirestore.instance);
 }
 
+@riverpod
 Stream<List<Task>> loadTasks(Ref ref) {
   final firestoreRepository = ref.watch(firestoreRepositoryProvider);
   return firestoreRepository.loadTasks();
+}
+
+@riverpod
+Stream<List<Task>> loadCompletedTasks(Ref ref) {
+  final firestoreRepository = ref.watch(firestoreRepositoryProvider);
+  return firestoreRepository.loadCompletedTasks();
+}
+
+@riverpod
+Stream<List<Task>> loadIncompletedTasks(Ref ref) {
+  final firestoreRepository = ref.watch(firestoreRepositoryProvider);
+  return firestoreRepository.loadIncompletedTasks();
 }

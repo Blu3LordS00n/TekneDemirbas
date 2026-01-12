@@ -3,6 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
+import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/task_management/domain/Task.dart';
+import 'package:tekne_demirbas/features/task_management/presentation/firestore_controller.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/confirm_delete_dialog.dart';
@@ -23,16 +27,16 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  final List<String> _taskType = [
+  final List<String> _taskTypes = [
     'Ic Bakim',
     'Dis Bakim',
     'Elektrik Sistemleri',
     'Motor',
   ];
-  final int _lockedJobTypeCount = 4;
-  int _selectedJobTypeIndex = 0;
+  final int _lockedTaskTypeCount = 4;
+  int _selectedTaskTypeIndex = 0;
 
-  final List<String> _boatType = [
+  final List<String> _boatTypes = [
     'LALUNA',
     'SC1',
     'SC2',
@@ -129,6 +133,13 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
+    final userId = ref.watch(currentUserProvider)!.uid;
+    final state = ref.watch(firestoreControllerProvider);
+
+    ref.listen<AsyncValue>(firestoreControllerProvider, (_, state) {
+      state.showAlertDialogOnError(context);
+    });
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -160,10 +171,10 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
             EditableDropdown(
               label: "İş Türü",
-              items: _taskType,
-              selectedIndex: _selectedJobTypeIndex,
-              lockedCount: _lockedJobTypeCount,
-              onChanged: (i) => setState(() => _selectedJobTypeIndex = i),
+              items: _taskTypes,
+              selectedIndex: _selectedTaskTypeIndex,
+              lockedCount: _lockedTaskTypeCount,
+              onChanged: (i) => setState(() => _selectedTaskTypeIndex = i),
               onAddNew: () async {
                 final name = await showAddItemDialog(
                   context: context,
@@ -172,23 +183,23 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 );
                 if (name != null) {
                   setState(() {
-                    _taskType.add(name);
-                    _selectedJobTypeIndex = _taskType.length - 1;
+                    _taskTypes.add(name);
+                    _selectedTaskTypeIndex = _taskTypes.length - 1;
                   });
                 }
               },
               onDelete: (i) async {
                 final confirmed = await showConfirmDeleteDialog(
                   context: context,
-                  itemName: _taskType[i],
+                  itemName: _taskTypes[i],
                 );
                 if (confirmed) {
                   setState(() {
-                    _taskType.removeAt(i);
-                    if (_selectedJobTypeIndex == i) {
-                      _selectedJobTypeIndex = 0;
-                    } else if (_selectedJobTypeIndex > i) {
-                      _selectedJobTypeIndex--;
+                    _taskTypes.removeAt(i);
+                    if (_selectedTaskTypeIndex == i) {
+                      _selectedTaskTypeIndex = 0;
+                    } else if (_selectedTaskTypeIndex > i) {
+                      _selectedTaskTypeIndex--;
                     }
                   });
                 }
@@ -199,7 +210,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
             EditableDropdown(
               label: "Tekne",
-              items: _boatType,
+              items: _boatTypes,
               selectedIndex: _selectedBoatTypeIndex,
               lockedCount: _lockedBoatTypeCount,
               onChanged: (i) => setState(() => _selectedBoatTypeIndex = i),
@@ -211,19 +222,19 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 );
                 if (name != null) {
                   setState(() {
-                    _boatType.add(name);
-                    _selectedBoatTypeIndex = _boatType.length - 1;
+                    _boatTypes.add(name);
+                    _selectedBoatTypeIndex = _boatTypes.length - 1;
                   });
                 }
               },
               onDelete: (i) async {
                 final confirmed = await showConfirmDeleteDialog(
                   context: context,
-                  itemName: _boatType[i],
+                  itemName: _boatTypes[i],
                 );
                 if (confirmed) {
                   setState(() {
-                    _boatType.removeAt(i);
+                    _boatTypes.removeAt(i);
                     if (_selectedBoatTypeIndex == i) {
                       _selectedBoatTypeIndex = 0;
                     } else if (_selectedBoatTypeIndex > i) {
@@ -329,7 +340,25 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
             SizedBox(height: SizeConfig.getProportionateHeight(5)),
 
             InkWell(
-              onTap: () {},
+              onTap: () {
+                final title = _titleController.text.trim();
+                final description = _descriptionController.text.trim();
+                String taskType = _taskTypes[_selectedTaskTypeIndex];
+                String boatType = _boatTypes[_selectedBoatTypeIndex];
+                String date = DateTime.now().toString();
+
+                final myTask = Task(
+                  title: title,
+                  description: description,
+                  taskType: taskType,
+                  boatType: boatType,
+                  date: date,
+                );
+
+                ref
+                    .read(firestoreControllerProvider.notifier)
+                    .addTask(task: myTask, userId: userId);
+              },
               child: Container(
                 alignment: Alignment.center,
                 height: SizeConfig.getProportionateHeight(50),
@@ -338,17 +367,19 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   color: Colors.greenAccent,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'Gorev Ekle',
-                      style: Appstyles.titleTextStyle.copyWith(
-                        color: Colors.white,
+                child: state.isLoading
+                    ? const CircularProgressIndicator()
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Gorev Ekle',
+                            style: Appstyles.titleTextStyle.copyWith(
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
               ),
             ),
           ],
