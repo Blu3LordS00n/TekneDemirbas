@@ -1,9 +1,12 @@
+import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+
 class Task {
   final String id;
   final String title;
   final String description;
   final String taskType;
   final String boatType;
+  final String createdBy;
   final String date;
   final bool isComplete;
 
@@ -13,6 +16,7 @@ class Task {
     required this.description,
     required this.taskType,
     required this.boatType,
+    required this.createdBy,
     required this.date,
     this.isComplete = false,
   });
@@ -24,6 +28,7 @@ class Task {
       description: map['description'] ?? '',
       taskType: map['taskType'] ?? '',
       boatType: map['boatType'] ?? '',
+      createdBy: map['createdBy'] ?? '',
       date: map['date'] ?? '',
       isComplete: map['isComplete'] ?? false,
     );
@@ -35,7 +40,8 @@ class Task {
       'description': description,
       'taskType': taskType,
       'boatType': boatType,
-      'date': date, // 🔹 direkt string
+      'createdBy': createdBy,
+      'date': date,
       'isComplete': isComplete,
     };
   }
@@ -46,6 +52,7 @@ class Task {
     String? description,
     String? taskType,
     String? boatType,
+    String? createdBy,
     String? date,
     bool? isComplete,
   }) {
@@ -55,6 +62,7 @@ class Task {
       description: description ?? this.description,
       taskType: taskType ?? this.taskType,
       boatType: boatType ?? this.boatType,
+      createdBy: createdBy ?? this.createdBy,
       date: date ?? this.date,
       isComplete: isComplete ?? this.isComplete,
     );
@@ -70,6 +78,7 @@ class Task {
         other.description == description &&
         other.taskType == taskType &&
         other.boatType == boatType &&
+        other.createdBy == createdBy &&
         other.date == date &&
         other.isComplete == isComplete;
   }
@@ -81,6 +90,7 @@ class Task {
         description.hashCode ^
         taskType.hashCode ^
         boatType.hashCode ^
+        createdBy.hashCode ^
         date.hashCode ^
         isComplete.hashCode;
   }
@@ -93,8 +103,37 @@ class Task {
         'description: $description, '
         'taskType: $taskType, '
         'boatType: $boatType, '
+        'createdBy: $createdBy, '
         'date: $date, '
         'isComplete: $isComplete'
         ')';
+  }
+
+  DateTime? get dateTime {
+    try {
+      return DateTime.parse(date);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String get formattedDate {
+    final dt = dateTime;
+    if (dt == null) return '';
+
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = dt.month.toString().padLeft(2, '0');
+    final year = dt.year.toString();
+
+    return '$day/$month/$year';
+  }
+
+  String get createdByUsername {
+    if (createdBy.isEmpty) return '';
+
+    final atIndex = createdBy.indexOf('@');
+    if (atIndex == -1) return createdBy;
+
+    return createdBy.substring(0, atIndex);
   }
 }

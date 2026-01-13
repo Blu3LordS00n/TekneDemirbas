@@ -11,11 +11,7 @@ class FirestoreRepository {
   final FirebaseFirestore _firestore;
 
   Future<void> addTask({required Task task, required String userId}) async {
-    final docRef = await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('tasks')
-        .add(task.toMap());
+    final docRef = await _firestore.collection('tasks').add(task.toMap());
 
     await docRef.update({'id': docRef.id});
   }
@@ -25,12 +21,7 @@ class FirestoreRepository {
     required String taskId,
     required String userId,
   }) async {
-    await _firestore
-        .collection('users')
-        .doc(userId)
-        .collection('tasks')
-        .doc(taskId)
-        .update(task.toMap());
+    await _firestore.collection('tasks').doc(taskId).update(task.toMap());
   }
 
   Stream<List<Task>> loadTasks() {

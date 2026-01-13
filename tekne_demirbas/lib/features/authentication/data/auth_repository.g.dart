@@ -83,7 +83,7 @@ final class AuthStateChangesProvider
 
 String _$authStateChangesHash() => r'e0ba298df256aa0e5c67aded5bc4dcbe1a433cdf';
 
-@ProviderFor(currentUesr)
+@ProviderFor(currentUser)
 final currentUserProvider = CurrentUserProvider._();
 
 final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
@@ -93,14 +93,14 @@ final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
         from: null,
         argument: null,
         retry: null,
-        name: r'currentUesrProvider',
+        name: r'currentUserProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$currentUesrHash();
+  String debugGetCreateSourceHash() => _$currentUserHash();
 
   @$internal
   @override
@@ -109,7 +109,7 @@ final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
 
   @override
   User? create(Ref ref) {
-    return currentUesr(ref);
+    return currentUser(ref);
   }
 
   /// {@macro riverpod.override_with_value}
@@ -121,4 +121,4 @@ final class CurrentUserProvider extends $FunctionalProvider<User?, User?, User?>
   }
 }
 
-String _$currentUesrHash() => r'32276ff34c759af8a374ddca81e6ab0cff759e14';
+String _$currentUserHash() => r'b367f58b96bb951a08bf3875efc474d0fcada754';

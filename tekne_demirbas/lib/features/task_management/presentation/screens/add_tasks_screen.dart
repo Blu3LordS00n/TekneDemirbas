@@ -135,6 +135,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
     final userId = ref.watch(currentUserProvider)!.uid;
     final state = ref.watch(firestoreControllerProvider);
+    final email = ref.watch(currentUserProvider)!.email;
 
     ref.listen<AsyncValue>(firestoreControllerProvider, (_, state) {
       state.showAlertDialogOnError(context);
@@ -144,7 +145,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
       appBar: AppBar(
         title: Text(
           'Görev Oluştur',
-          style: Appstyles.titleTextStyle.copyWith(color: Colors.white),
+          style: Appstyles.headingTextStyle.copyWith(color: Colors.white),
         ),
       ),
       body: SingleChildScrollView(
@@ -352,6 +353,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   description: description,
                   taskType: taskType,
                   boatType: boatType,
+                  createdBy: email.toString(),
                   date: date,
                 );
 
@@ -374,7 +376,8 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                         children: [
                           Text(
                             'Gorev Ekle',
-                            style: Appstyles.titleTextStyle.copyWith(
+                            style: Appstyles.normalTextStyle.copyWith(
+                              fontSize: 24,
                               color: Colors.white,
                             ),
                           ),
