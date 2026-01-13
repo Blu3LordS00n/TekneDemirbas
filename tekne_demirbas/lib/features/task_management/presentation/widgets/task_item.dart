@@ -164,17 +164,28 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      children: [
-                        _Tag(text: widget.task.boatType, color: Colors.green),
-                        SizedBox(width: 15),
-                        _Tag(text: widget.task.taskType, color: Colors.blue),
-                        SizedBox(width: 15),
-                        _Tag(
-                          text: widget.task.createdByUsername,
-                          color: Colors.purple,
+                    Expanded(
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _Tag(
+                              text: widget.task.boatType,
+                              color: Colors.green,
+                            ),
+                            const SizedBox(width: 15),
+                            _Tag(
+                              text: widget.task.taskType,
+                              color: Colors.blue,
+                            ),
+                            const SizedBox(width: 15),
+                            _Tag(
+                              text: widget.task.createdByUsername,
+                              color: Colors.purple,
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
 
                     GestureDetector(

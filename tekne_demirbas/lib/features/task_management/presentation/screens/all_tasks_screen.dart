@@ -30,7 +30,7 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
       appBar: AppBar(
         title: Text(
           'Gorevlerim',
-          style: Appstyles.headingTextStyle.copyWith(color: Colors.white),
+          style: Appstyles.titleTextStyle.copyWith(color: Colors.white),
         ),
       ),
       body: AsyncValueWidget<List<Task>>(

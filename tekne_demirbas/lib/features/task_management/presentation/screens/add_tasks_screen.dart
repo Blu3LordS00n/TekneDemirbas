@@ -145,7 +145,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
       appBar: AppBar(
         title: Text(
           'Görev Oluştur',
-          style: Appstyles.headingTextStyle.copyWith(color: Colors.white),
+          style: Appstyles.titleTextStyle.copyWith(color: Colors.white),
         ),
       ),
       body: SingleChildScrollView(

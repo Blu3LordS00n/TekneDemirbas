@@ -25,7 +25,7 @@ class IncompleteTasksScreen extends ConsumerWidget {
       appBar: AppBar(
         title: Text(
           'Tamamlanmamis Gorevlerim',
-          style: Appstyles.headingTextStyle.copyWith(color: Colors.white),
+          style: Appstyles.titleTextStyle.copyWith(color: Colors.white),
         ),
       ),
       body: AsyncValueWidget<List<Task>>(
