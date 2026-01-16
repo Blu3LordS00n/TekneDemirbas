@@ -21,6 +21,7 @@ class CommonTextField extends StatelessWidget {
     return TextFormField(
       keyboardType: textInputType,
       controller: controller,
+      obscureText: obscureText ?? false,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: Appstyles.normalTextStyle,

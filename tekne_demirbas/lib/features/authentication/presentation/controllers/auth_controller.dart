@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
 
 part 'auth_controller.g.dart';
 
@@ -13,16 +14,31 @@ class AuthController extends _$AuthController {
     throw UnimplementedError();
   }
 
-  Future<void> createUserWithEmailAndPassword({
+  Future<bool> createUserWithEmailAndPassword({
     required String email,
     required String password,
+    required String displayName,
   }) async {
     state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref
+    try {
+      await ref
           .read(authRepositoryProvider)
-          .createUserWithEmailAndPassword(email: email, password: password),
-    );
+          .createUserWithEmailAndPassword(email: email, password: password);
+      
+      // Kullanıcı oluşturulduktan sonra ismini Firestore'a kaydet
+      final user = ref.read(authRepositoryProvider).currentUser;
+      if (user != null && displayName.isNotEmpty) {
+        await ref
+            .read(roomRepositoryProvider)
+            .updateUserDisplayName(user.uid, displayName);
+      }
+      
+      state = const AsyncValue.data(null);
+      return true;
+    } catch (e, stack) {
+      state = AsyncValue.error(e, stack);
+      return false;
+    }
   }
 
   Future<void> signInWithEmailAndPassword({

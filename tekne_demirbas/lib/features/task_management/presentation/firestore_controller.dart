@@ -19,6 +19,7 @@ class FirestoreController extends _$FirestoreController {
   Future<void> addTask({
     required Task task,
     required String userId,
+    required String roomId,
     List<String>? imageUrls,
     String? videoUrl,
   }) async {
@@ -27,7 +28,11 @@ class FirestoreController extends _$FirestoreController {
     
     try {
       // Önce task'ı oluştur ve ID'yi al
-      final taskId = await fireStoreRepository.addTask(task: task, userId: userId);
+      final taskId = await fireStoreRepository.addTask(
+        task: task, 
+        userId: userId,
+        roomId: roomId,
+      );
       
       // Medya varsa task'ı güncelle
       if (imageUrls != null || videoUrl != null) {

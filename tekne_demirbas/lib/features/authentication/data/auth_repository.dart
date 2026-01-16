@@ -12,17 +12,47 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password);
+    final userCredential = await _auth.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+    
+    // Email verification kontrolü
+    if (userCredential.user != null) {
+      await userCredential.user!.reload();
+      if (!userCredential.user!.emailVerified) {
+        throw FirebaseAuthException(
+          code: 'email-not-verified',
+          message: 'Lütfen email adresinizi doğrulayın',
+        );
+      }
+    }
   }
 
   Future<void> createUserWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _auth.createUserWithEmailAndPassword(
+    final userCredential = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+    
+    // Email verification gönder
+    if (userCredential.user != null && !userCredential.user!.emailVerified) {
+      await userCredential.user!.sendEmailVerification();
+    }
+  }
+
+  Future<void> sendEmailVerification() async {
+    final user = _auth.currentUser;
+    if (user != null && !user.emailVerified) {
+      await user.sendEmailVerification();
+    }
+  }
+
+  Future<void> reloadUser() async {
+    await _auth.currentUser?.reload();
   }
 
   User? get currentUser {
@@ -34,7 +64,12 @@ class AuthRepository {
   }
 
   Future<void> signOut() async {
+    // Tüm Firebase Auth state'ini temizle
     await _auth.signOut();
+    // Ekstra güvenlik için bir kez daha kontrol et
+    if (_auth.currentUser != null) {
+      await _auth.signOut();
+    }
   }
 }
 
@@ -51,7 +86,8 @@ Stream<User?> authStateChanges(Ref ref) {
 }
 
 @Riverpod(keepAlive: true)
-User? currentUser(Ref ref) {
+Stream<User?> currentUser(Ref ref) {
+  // Auth state değişikliklerini dinle
   final authRepository = ref.watch(authRepositoryProvider);
-  return authRepository.currentUser;
+  return authRepository.authStateChanges();
 }

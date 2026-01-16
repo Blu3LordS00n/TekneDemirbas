@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
 import 'package:tekne_demirbas/common_widgets/async_value_widget.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart';
 import 'package:tekne_demirbas/features/task_management/domain/task.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/providers/task_filter_provider.dart';
@@ -20,10 +21,24 @@ class AllTasksScreen extends ConsumerStatefulWidget {
 class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
   @override
   Widget build(BuildContext context) {
-    final userId = ref.watch(currentUserProvider)!.uid;
-    final taskAsyncValue = ref.watch(filteredTasksProvider);
+    final roomId = ref.watch(selectedRoomProvider);
+    
+    if (roomId == null) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.meeting_room, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text('Lütfen bir oda seçin'),
+          ],
+        ),
+      );
+    }
 
-    ref.listen<AsyncValue>(loadTasksProvider, (_, state) {
+    final taskAsyncValue = ref.watch(filteredTasksProvider(roomId));
+
+    ref.listen<AsyncValue>(loadTasksProvider(roomId), (_, state) {
       state.showAlertDialogOnError(context);
     });
 

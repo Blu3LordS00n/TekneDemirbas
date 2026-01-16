@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/permission_provider.dart';
 import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart';
 import 'package:tekne_demirbas/features/task_management/domain/task.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/firestore_controller.dart';
@@ -186,36 +187,45 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                 ),
               ),
               actions: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // Sil Butonu
-                    TextButton.icon(
-                      onPressed: () {
-                        context.pop();
-                        _showDeleteConfirmation();
-                      },
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      label: Text(
-                        'Sil',
-                        style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
-                      ),
-                    ),
-                    // İptal ve Güncelle Butonları
-                    Row(
+                Consumer(
+                  builder: (context, ref, _) {
+                    final canEdit = ref.watch(canEditTaskProvider);
+                    final canDelete = ref.watch(canDeleteTaskProvider);
+                    
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        OutlinedButton(
-                          onPressed: () => context.pop(),
-                          style: OutlinedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                        // Sil Butonu - sadece canDelete varsa göster
+                        if (canDelete)
+                          TextButton.icon(
+                            onPressed: () {
+                              context.pop();
+                              _showDeleteConfirmation();
+                            },
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            label: Text(
+                              'Sil',
+                              style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
                             ),
-                          ),
-                          child: Text('İptal', style: Appstyles.normalTextStyle),
-                        ),
-                        const SizedBox(width: 10),
-                        // Güncelle Butonu
-                        ElevatedButton(
+                          )
+                        else
+                          const SizedBox.shrink(),
+                        // İptal ve Güncelle Butonları
+                        Row(
+                          children: [
+                            OutlinedButton(
+                              onPressed: () => context.pop(),
+                              style: OutlinedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              child: Text('İptal', style: Appstyles.normalTextStyle),
+                            ),
+                            const SizedBox(width: 10),
+                            // Güncelle Butonu - sadece canEdit varsa göster
+                            if (canEdit)
+                              ElevatedButton(
                           onPressed: () {
                             if (titleController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -231,6 +241,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               taskType: selectedTaskType ?? widget.task.taskType,
                               boatType: selectedBoatType ?? widget.task.boatType,
                               createdBy: widget.task.createdBy,
+                              roomId: widget.task.roomId,
                               isComplete: widget.task.isComplete,
                               date: DateTime.now().toString(),
                             );
@@ -250,14 +261,18 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                          child: Text(
-                            'Güncelle',
-                            style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
-                          ),
+                                child: Text(
+                                  'Güncelle',
+                                  style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
+                                ),
+                              )
+                            else
+                              const SizedBox.shrink(),
+                          ],
                         ),
                       ],
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -373,6 +388,18 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                         value: widget.task.isComplete,
                         onChanged: (bool? value) {
                           if (value == null) return;
+                          
+                          // Görev ekleme yetkisi kontrolü (görev ekleme yetkisi olmayan sadece görüntüleyebilir)
+                          final canAddTask = ref.read(canAddTaskProvider);
+                          if (!canAddTask) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Görev durumunu değiştirme yetkiniz yok. Sadece görüntüleme yetkiniz var.'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                            return;
+                          }
 
                           ref
                               .read(firestoreRepositoryProvider)
@@ -415,21 +442,33 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       ),
                     ),
 
-                    GestureDetector(
-                      onTap: _editTask,
-                      child: Container(
-                        height: SizeConfig.getProportionateHeight(40),
-                        padding: const EdgeInsets.all(5),
-                        decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.edit,
-                          color: Colors.white,
-                          size: 30.0,
-                        ),
-                      ),
+                    // Permission kontrolü: Edit veya Delete yetkisi varsa göster
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final canEdit = ref.watch(canEditTaskProvider);
+                        final canDelete = ref.watch(canDeleteTaskProvider);
+                        
+                        if (!canEdit && !canDelete) {
+                          return const SizedBox.shrink();
+                        }
+                        
+                        return GestureDetector(
+                          onTap: canEdit ? _editTask : null,
+                          child: Container(
+                            height: SizeConfig.getProportionateHeight(40),
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: canEdit ? Colors.green : Colors.grey,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.edit,
+                              color: Colors.white,
+                              size: 30.0,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

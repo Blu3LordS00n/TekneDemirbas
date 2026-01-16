@@ -34,7 +34,7 @@ final class FirestoreControllerProvider
 }
 
 String _$firestoreControllerHash() =>
-    r'52e87e39d790e858b448b4b011c2f0ad0c9a3fe2';
+    r'aa1faa40ab567c0823671a2ac2569e81078bd021';
 
 abstract class _$FirestoreController extends $AsyncNotifier<void> {
   FutureOr<void> build();

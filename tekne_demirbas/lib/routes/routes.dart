@@ -5,31 +5,40 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:tekne_demirbas/features/authentication/presentation/screens/register_screen.dart';
 import 'package:tekne_demirbas/features/authentication/presentation/screens/sign_in_screen.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/screens/room_selection_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/screens/main_screen.dart';
 import 'package:tekne_demirbas/routes/go_router_refresh_stream.dart';
 
 part 'routes.g.dart';
 
-enum AppRoutes { main, signIn, register }
+enum AppRoutes { roomSelection, main, signIn, register }
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
 });
 
-@riverpod
+  @riverpod
 GoRouter goRouter(Ref ref) {
   final firebaseAuth = ref.watch(firebaseAuthProvider);
   return GoRouter(
-    initialLocation: '/main',
+    initialLocation: '/roomSelection',
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
       final isLoggedIn = firebaseAuth.currentUser != null;
+      final isEmailVerified = firebaseAuth.currentUser?.emailVerified ?? false;
+      final currentPath = state.uri.toString();
 
-      if (isLoggedIn &&
-          (state.uri.toString() == '/signIn' ||
-              state.uri.toString() == '/register')) {
-        return '/main';
-      } else if (!isLoggedIn && state.uri.toString().startsWith('/main')) {
+      // Email doğrulanmamış kullanıcı giriş yapamaz
+      if (isLoggedIn && !isEmailVerified && 
+          (currentPath == '/main' || currentPath == '/roomSelection')) {
+        return '/signIn'; // Email doğrulama mesajı gösterilecek
+      }
+
+      if (isLoggedIn && isEmailVerified &&
+          (currentPath == '/signIn' || currentPath == '/register')) {
+        return '/roomSelection';
+      } else if (!isLoggedIn && 
+          (currentPath.startsWith('/main') || currentPath.startsWith('/roomSelection'))) {
         return '/signIn';
       } else {
         return null;
@@ -37,6 +46,11 @@ GoRouter goRouter(Ref ref) {
     },
     refreshListenable: GoRouterRefreshStream(firebaseAuth.authStateChanges()),
     routes: [
+      GoRoute(
+        path: '/roomSelection',
+        name: AppRoutes.roomSelection.name,
+        builder: (cxt, state) => const RoomSelectionScreen(),
+      ),
       GoRoute(
         path: '/main',
         name: AppRoutes.main.name,

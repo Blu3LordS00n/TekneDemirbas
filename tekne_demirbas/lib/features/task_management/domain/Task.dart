@@ -11,6 +11,7 @@ class Task {
   final bool isComplete;
   final List<String> imageUrls;
   final String? videoUrl;
+  final String roomId; // Task hangi odaya ait
 
   const Task({
     this.id = '',
@@ -20,6 +21,7 @@ class Task {
     required this.boatType,
     required this.createdBy,
     required this.date,
+    required this.roomId,
     this.isComplete = false,
     this.imageUrls = const [],
     this.videoUrl,
@@ -34,6 +36,7 @@ class Task {
       boatType: map['boatType'] ?? '',
       createdBy: map['createdBy'] ?? '',
       date: map['date'] ?? '',
+      roomId: map['roomId'] ?? '',
       isComplete: map['isComplete'] ?? false,
       imageUrls: map['imageUrls'] != null 
           ? List<String>.from(map['imageUrls']) 
@@ -50,6 +53,7 @@ class Task {
       'boatType': boatType,
       'createdBy': createdBy,
       'date': date,
+      'roomId': roomId,
       'isComplete': isComplete,
       'imageUrls': imageUrls,
       'videoUrl': videoUrl,
@@ -64,6 +68,7 @@ class Task {
     String? boatType,
     String? createdBy,
     String? date,
+    String? roomId,
     bool? isComplete,
     List<String>? imageUrls,
     String? videoUrl,
@@ -76,6 +81,7 @@ class Task {
       boatType: boatType ?? this.boatType,
       createdBy: createdBy ?? this.createdBy,
       date: date ?? this.date,
+      roomId: roomId ?? this.roomId,
       isComplete: isComplete ?? this.isComplete,
       imageUrls: imageUrls ?? this.imageUrls,
       videoUrl: videoUrl ?? this.videoUrl,

@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/permission_provider.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart';
 import 'package:tekne_demirbas/features/task_management/data/storage_repository.dart';
 import 'package:tekne_demirbas/features/task_management/domain/task.dart';
@@ -117,9 +119,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   Widget build(BuildContext context) {
     SizeConfig.init(context);
 
-    final userId = ref.watch(currentUserProvider)!.uid;
+    final userAsync = ref.watch(currentUserProvider);
+    final user = userAsync.value;
+    if (user == null) {
+      return const Center(child: Text('Kullanıcı bulunamadı'));
+    }
+    final userId = user.uid;
     final state = ref.watch(firestoreControllerProvider);
-    final email = ref.watch(currentUserProvider)!.email;
+    final email = user.email;
+    
+    // Görev ekleme yetkisi kontrolü
+    final canAddTask = ref.watch(canAddTaskProvider);
 
     final boatTypeAsync = ref.watch(boat_provider.boatTypesProvider);
     final boatController = ref.read(boatTypeControllerProvider.notifier);
@@ -130,6 +140,28 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
     ref.listen<AsyncValue>(firestoreControllerProvider, (_, state) {
       state.showAlertDialogOnError(context);
     });
+    
+    // Yetki yoksa mesaj göster
+    if (!canAddTask) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.block, size: 64, color: Colors.grey),
+            SizedBox(height: 16),
+            Text(
+              'Görev ekleme yetkiniz yok',
+              style: TextStyle(fontSize: 18, color: Colors.grey),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Lütfen oda yöneticisinden yetki isteyin',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
@@ -358,6 +390,18 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
             InkWell(
               onTap: () async {
+                // Yetki kontrolü
+                final canAdd = ref.read(canAddTaskProvider);
+                if (!canAdd) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Görev ekleme yetkiniz yok'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+                
                 final title = _titleController.text.trim();
                 if (title.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -373,6 +417,14 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 String boatType = boatTypes[_selectedBoatTypeIndex].name;
                 String date = DateTime.now().toString();
 
+                final roomId = ref.read(selectedRoomProvider);
+                if (roomId == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Lütfen bir oda seçin')),
+                  );
+                  return;
+                }
+
                 final myTask = Task(
                   title: title,
                   description: description,
@@ -380,12 +432,13 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   boatType: boatType,
                   createdBy: email.toString(),
                   date: date,
+                  roomId: roomId,
                 );
 
                 // Önce task'ı oluştur
                 final taskId = await ref
                     .read(firestoreRepositoryProvider)
-                    .addTask(task: myTask, userId: userId);
+                    .addTask(task: myTask, userId: userId, roomId: roomId);
 
                 // Medya varsa yükle
                 List<String>? imageUrls;

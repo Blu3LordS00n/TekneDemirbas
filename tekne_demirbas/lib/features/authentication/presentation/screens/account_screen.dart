@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
+import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/utils/appstyles.dart';
 import 'package:tekne_demirbas/utils/size_config.dart';
 
@@ -10,7 +12,22 @@ class AccountScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUser = ref.watch(currentUserProvider)!;
+    final currentUserAsync = ref.watch(currentUserProvider);
+    
+    return currentUserAsync.when(
+      data: (currentUser) {
+        if (currentUser == null) {
+          return const Center(child: Text('Kullanıcı bulunamadı'));
+        }
+        
+        return _buildAccountContent(context, ref, currentUser);
+      },
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (_, __) => const Center(child: Text('Hata oluştu')),
+    );
+  }
+  
+  Widget _buildAccountContent(BuildContext context, WidgetRef ref, currentUser) {
 
     return Center(
         child: Column(
@@ -46,9 +63,30 @@ class AccountScreen extends ConsumerWidget {
                         child: Text('Hayir', style: Appstyles.normalTextStyle),
                       ),
                       ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
                           context.pop();
-                          ref.read(authRepositoryProvider).signOut();
+                          final userId = currentUser.uid;
+                          
+                          // Oda seçimini temizle
+                          ref.read(selectedRoomProvider.notifier).clear();
+                          
+                          // Tüm provider'ları invalidate et
+                          ref.invalidate(selectedRoomProvider);
+                          if (userId != null) {
+                            ref.invalidate(loadUserRoomsProvider(userId));
+                            ref.invalidate(loadUserRoomRequestsProvider(userId));
+                          }
+                          
+                          // Çıkış yap
+                          await ref.read(authRepositoryProvider).signOut();
+                          
+                          // Biraz bekle ki Firebase state güncellensin
+                          await Future.delayed(const Duration(milliseconds: 500));
+                          
+                          // Sign in ekranına yönlendir
+                          if (context.mounted) {
+                            context.go('/signIn');
+                          }
                         },
                         child: Text('Evet', style: Appstyles.normalTextStyle),
                       ),

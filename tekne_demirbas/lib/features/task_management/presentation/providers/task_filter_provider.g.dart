@@ -42,7 +42,7 @@ final class TaskFilterControllerProvider
 }
 
 String _$taskFilterControllerHash() =>
-    r'cbfea46d6381db02cfac594d378ef6a85947e526';
+    r'024b206b29410d09bfa93d0d34b9482d9f5e031d';
 
 abstract class _$TaskFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -95,7 +95,7 @@ final class AllTasksFilterControllerProvider
 }
 
 String _$allTasksFilterControllerHash() =>
-    r'dcfeb56e7492ec13dgad605e489fg970b97048f637';
+    r'f8bb020d4d62c99d23fa17e7be8b0ee1917a90da';
 
 abstract class _$AllTasksFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -116,7 +116,8 @@ abstract class _$AllTasksFilterController extends $Notifier<TaskFilter> {
 }
 
 @ProviderFor(CompletedTasksFilterController)
-final completedTasksFilterControllerProvider = CompletedTasksFilterControllerProvider._();
+final completedTasksFilterControllerProvider =
+    CompletedTasksFilterControllerProvider._();
 
 final class CompletedTasksFilterControllerProvider
     extends $NotifierProvider<CompletedTasksFilterController, TaskFilter> {
@@ -148,7 +149,7 @@ final class CompletedTasksFilterControllerProvider
 }
 
 String _$completedTasksFilterControllerHash() =>
-    r'ecfgb67f8503fd24ehbe716f59ag081c08159g748';
+    r'5b43740f72cb4bc85a369a4538682c2092df4f2b';
 
 abstract class _$CompletedTasksFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -169,7 +170,8 @@ abstract class _$CompletedTasksFilterController extends $Notifier<TaskFilter> {
 }
 
 @ProviderFor(IncompletedTasksFilterController)
-final incompletedTasksFilterControllerProvider = IncompletedTasksFilterControllerProvider._();
+final incompletedTasksFilterControllerProvider =
+    IncompletedTasksFilterControllerProvider._();
 
 final class IncompletedTasksFilterControllerProvider
     extends $NotifierProvider<IncompletedTasksFilterController, TaskFilter> {
@@ -189,7 +191,8 @@ final class IncompletedTasksFilterControllerProvider
 
   @$internal
   @override
-  IncompletedTasksFilterController create() => IncompletedTasksFilterController();
+  IncompletedTasksFilterController create() =>
+      IncompletedTasksFilterController();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(TaskFilter value) {
@@ -201,9 +204,10 @@ final class IncompletedTasksFilterControllerProvider
 }
 
 String _$incompletedTasksFilterControllerHash() =>
-    r'fcghc78g9614ge35ficg827g60bh192d19260h859';
+    r'fea52681161b40789078ed0301d351563a717c02';
 
-abstract class _$IncompletedTasksFilterController extends $Notifier<TaskFilter> {
+abstract class _$IncompletedTasksFilterController
+    extends $Notifier<TaskFilter> {
   TaskFilter build();
   @$mustCallSuper
   @override

@@ -19,8 +19,14 @@ class FirestoreRepository {
   final FirebaseFirestore _firestore;
 
   /// ---------- TASKS ----------
-  Future<String> addTask({required Task task, required String userId}) async {
-    final docRef = await _firestore.collection('tasks').add(task.toMap());
+  Future<String> addTask({
+    required Task task,
+    required String userId,
+    required String roomId,
+  }) async {
+    final taskMap = task.toMap();
+    taskMap['roomId'] = roomId; // Room ID'yi ekle
+    final docRef = await _firestore.collection('tasks').add(taskMap);
     await docRef.update({'id': docRef.id});
     return docRef.id; // Task ID'yi döndür
   }
@@ -46,28 +52,57 @@ class FirestoreRepository {
     });
   }
 
-  Stream<List<Task>> loadTasks() {
+  Stream<List<Task>> loadTasks(String roomId) {
     return _firestore
         .collection('tasks')
-        .orderBy('date', descending: true)
+        .where('roomId', isEqualTo: roomId)
         .snapshots()
-        .map((s) => s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList());
+        .map((s) {
+          final tasks = s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList();
+          // Client-side'da tarihe göre sırala (en yeni önce)
+          tasks.sort((a, b) {
+            final dateA = a.dateTime ?? DateTime(1970);
+            final dateB = b.dateTime ?? DateTime(1970);
+            return dateB.compareTo(dateA); // Descending order
+          });
+          return tasks;
+        });
   }
 
-  Stream<List<Task>> loadCompletedTasks() {
+  Stream<List<Task>> loadCompletedTasks(String roomId) {
     return _firestore
         .collection('tasks')
+        .where('roomId', isEqualTo: roomId)
         .where('isComplete', isEqualTo: true)
         .snapshots()
-        .map((s) => s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList());
+        .map((s) {
+          final tasks = s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList();
+          // Client-side'da tarihe göre sırala (en yeni önce)
+          tasks.sort((a, b) {
+            final dateA = a.dateTime ?? DateTime(1970);
+            final dateB = b.dateTime ?? DateTime(1970);
+            return dateB.compareTo(dateA); // Descending order
+          });
+          return tasks;
+        });
   }
 
-  Stream<List<Task>> loadIncompletedTasks() {
+  Stream<List<Task>> loadIncompletedTasks(String roomId) {
     return _firestore
         .collection('tasks')
+        .where('roomId', isEqualTo: roomId)
         .where('isComplete', isEqualTo: false)
         .snapshots()
-        .map((s) => s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList());
+        .map((s) {
+          final tasks = s.docs.map((d) => Task.fromMap(d.data(), d.id)).toList();
+          // Client-side'da tarihe göre sırala (en yeni önce)
+          tasks.sort((a, b) {
+            final dateA = a.dateTime ?? DateTime(1970);
+            final dateB = b.dateTime ?? DateTime(1970);
+            return dateB.compareTo(dateA); // Descending order
+          });
+          return tasks;
+        });
   }
 
   /// ---------- TASK TYPES ----------
@@ -135,18 +170,18 @@ FirestoreRepository firestoreRepository(Ref ref) {
 }
 
 @riverpod
-Stream<List<Task>> loadTasks(Ref ref) {
-  return ref.watch(firestoreRepositoryProvider).loadTasks();
+Stream<List<Task>> loadTasks(Ref ref, String roomId) {
+  return ref.watch(firestoreRepositoryProvider).loadTasks(roomId);
 }
 
 @riverpod
-Stream<List<Task>> loadCompletedTasks(Ref ref) {
-  return ref.watch(firestoreRepositoryProvider).loadCompletedTasks();
+Stream<List<Task>> loadCompletedTasks(Ref ref, String roomId) {
+  return ref.watch(firestoreRepositoryProvider).loadCompletedTasks(roomId);
 }
 
 @riverpod
-Stream<List<Task>> loadIncompletedTasks(Ref ref) {
-  return ref.watch(firestoreRepositoryProvider).loadIncompletedTasks();
+Stream<List<Task>> loadIncompletedTasks(Ref ref, String roomId) {
+  return ref.watch(firestoreRepositoryProvider).loadIncompletedTasks(roomId);
 }
 
 @riverpod
@@ -163,32 +198,31 @@ Stream<List<BoatType>> boatTypes(Ref ref) {
 /// FILTERED TASKS (CLIENT SIDE)
 /// ===============================
 @riverpod
-Stream<List<Task>> filteredTasks(Ref ref) {
+Stream<List<Task>> filteredTasks(Ref ref, String roomId) {
   final filter = ref.watch(allTasksFilterControllerProvider);
   final repository = ref.watch(firestoreRepositoryProvider);
   
-  // Filter değiştiğinde yeni stream oluşturmak için filter'ı stream'e bağla
-  return repository.loadTasks().map((tasks) {
+  return repository.loadTasks(roomId).map((tasks) {
     return _applyFilters(tasks, filter);
   });
 }
 
 @riverpod
-Stream<List<Task>> filteredCompletedTasks(Ref ref) {
+Stream<List<Task>> filteredCompletedTasks(Ref ref, String roomId) {
   final filter = ref.watch(completedTasksFilterControllerProvider);
   final repository = ref.watch(firestoreRepositoryProvider);
   
-  return repository.loadCompletedTasks().map((tasks) {
+  return repository.loadCompletedTasks(roomId).map((tasks) {
     return _applyFilters(tasks, filter);
   });
 }
 
 @riverpod
-Stream<List<Task>> filteredIncompletedTasks(Ref ref) {
+Stream<List<Task>> filteredIncompletedTasks(Ref ref, String roomId) {
   final filter = ref.watch(incompletedTasksFilterControllerProvider);
   final repository = ref.watch(firestoreRepositoryProvider);
   
-  return repository.loadIncompletedTasks().map((tasks) {
+  return repository.loadIncompletedTasks(roomId).map((tasks) {
     return _applyFilters(tasks, filter);
   });
 }
