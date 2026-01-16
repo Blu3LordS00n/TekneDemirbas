@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
@@ -25,12 +26,16 @@ class AuthController extends _$AuthController {
           .read(authRepositoryProvider)
           .createUserWithEmailAndPassword(email: email, password: password);
       
-      // Kullanıcı oluşturulduktan sonra ismini Firestore'a kaydet
+      // Kullanıcı oluşturulduktan sonra ismini ve email'i Firestore'a kaydet
       final user = ref.read(authRepositoryProvider).currentUser;
       if (user != null && displayName.isNotEmpty) {
         await ref
             .read(roomRepositoryProvider)
             .updateUserDisplayName(user.uid, displayName);
+        // Email'i de kaydet
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'email': user.email,
+        }, SetOptions(merge: true));
       }
       
       state = const AsyncValue.data(null);

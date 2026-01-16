@@ -240,6 +240,11 @@ List<Task> _applyFilters(List<Task> tasks, TaskFilter filter) {
     result = result.where((t) => t.taskType == filter.taskType).toList();
   }
 
+  // Kullanıcı filtresi - null veya boş değilse filtrele
+  if (filter.createdBy != null && filter.createdBy!.isNotEmpty) {
+    result = result.where((t) => t.createdBy == filter.createdBy).toList();
+  }
+
   // Tarih filtresi
   if (filter.dateRange != null) {
     result = result.where((t) {

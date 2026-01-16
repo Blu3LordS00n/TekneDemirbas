@@ -430,7 +430,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   description: description,
                   taskType: taskType,
                   boatType: boatType,
-                  createdBy: email.toString(),
+                  createdBy: userId, // UID olarak sakla
                   date: date,
                   roomId: roomId,
                 );

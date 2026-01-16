@@ -621,6 +621,78 @@ final class LoadUserDisplayNameFamily extends $Family
   String toString() => r'loadUserDisplayNameProvider';
 }
 
+@ProviderFor(loadUserDisplayNameByEmail)
+final loadUserDisplayNameByEmailProvider = LoadUserDisplayNameByEmailFamily._();
+
+final class LoadUserDisplayNameByEmailProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
+    with $FutureModifier<String?>, $StreamProvider<String?> {
+  LoadUserDisplayNameByEmailProvider._({
+    required LoadUserDisplayNameByEmailFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'loadUserDisplayNameByEmailProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadUserDisplayNameByEmailHash();
+
+  @override
+  String toString() {
+    return r'loadUserDisplayNameByEmailProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<String?> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<String?> create(Ref ref) {
+    final argument = this.argument as String;
+    return loadUserDisplayNameByEmail(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LoadUserDisplayNameByEmailProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$loadUserDisplayNameByEmailHash() =>
+    r'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
+
+final class LoadUserDisplayNameByEmailFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<String?>, String> {
+  LoadUserDisplayNameByEmailFamily._()
+    : super(
+        retry: null,
+        name: r'loadUserDisplayNameByEmailProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  LoadUserDisplayNameByEmailProvider call(String email) =>
+      LoadUserDisplayNameByEmailProvider._(argument: email, from: this);
+
+  @override
+  String toString() => r'loadUserDisplayNameByEmailProvider';
+}
+
 @ProviderFor(pendingRoomRequestsCount)
 final pendingRoomRequestsCountProvider = PendingRoomRequestsCountFamily._();
 

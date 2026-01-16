@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room_request.dart';
@@ -124,8 +125,13 @@ class RoomRepository {
   }
 
   Future<void> updateUserDisplayName(String userId, String displayName) async {
+    // Önce mevcut kullanıcı bilgilerini al
+    final userDoc = await _firestore.collection('users').doc(userId).get();
+    final existingData = userDoc.data() ?? {};
+    
     await _firestore.collection('users').doc(userId).set({
       'displayName': displayName.trim(),
+      'email': existingData['email'], // Email'i koru (varsa)
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
   }
@@ -138,6 +144,20 @@ class RoomRepository {
         .map((doc) {
       if (!doc.exists) return null;
       return doc.data()?['displayName'] as String?;
+    });
+  }
+
+  // Email'den display name'i al
+  Stream<String?> loadUserDisplayNameByEmail(String email) {
+    // Email ile kullanıcıyı bul (users collection'ında email field'ı ile)
+    return _firestore
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .snapshots()
+        .map((snapshot) {
+      if (snapshot.docs.isEmpty) return null;
+      return snapshot.docs.first.data()['displayName'] as String?;
     });
   }
 
@@ -373,6 +393,11 @@ Stream<int> pendingRoomRequestsCount(Ref ref, String roomId) {
   return ref.watch(roomRepositoryProvider).loadRoomRequestsForRoom(roomId).map((requests) {
     return requests.where((request) => request.status == 'pending').length;
   });
+}
+
+@riverpod
+Stream<String?> loadUserDisplayNameByEmail(Ref ref, String email) {
+  return ref.watch(roomRepositoryProvider).loadUserDisplayNameByEmail(email);
 }
 
 @riverpod

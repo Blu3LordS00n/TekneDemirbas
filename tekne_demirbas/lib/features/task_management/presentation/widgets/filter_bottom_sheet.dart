@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
+import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart' as firestore_repo;
 import 'package:tekne_demirbas/features/task_management/domain/task_filter.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/providers/task_filter_provider.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/providers/boat_type_provider.dart';
@@ -20,6 +23,7 @@ class FilterBottomSheet extends ConsumerStatefulWidget {
 class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
   String? _selectedBoatType;
   String? _selectedTaskType;
+  String? _selectedCreatedBy;
   DateTimeRange? _selectedDateRange;
   bool _initialized = false;
 
@@ -30,12 +34,19 @@ class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
       final currentFilter = ref.read(widget.filterControllerProvider);
       _selectedBoatType = currentFilter.boatType;
       _selectedTaskType = currentFilter.taskType;
+      _selectedCreatedBy = currentFilter.createdBy;
       _selectedDateRange = currentFilter.dateRange;
       _initialized = true;
     }
 
+    final roomId = ref.watch(selectedRoomProvider);
     final boatTypeAsync = ref.watch(boatTypesProvider);
     final taskTypeAsync = ref.watch(taskTypesProvider);
+    
+    // Odadaki görevlerden kullanıcıları al (odaya ait kullanıcılar değil, görevi olan kullanıcılar)
+    final roomTasksAsync = roomId != null 
+        ? ref.watch(firestore_repo.loadTasksProvider(roomId))
+        : null;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -179,6 +190,90 @@ class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
 
             const SizedBox(height: 10),
 
+            /// 👤 KULLANICI
+            if (roomId != null && roomTasksAsync != null)
+              roomTasksAsync.when(
+                data: (tasks) {
+                  // Görevlerden unique createdBy (UID) değerlerini al
+                  final uniqueUserIds = tasks.map((task) => task.createdBy).toSet().toList();
+                  
+                  if (uniqueUserIds.isEmpty) {
+                    return const SizedBox.shrink();
+                  }
+                  
+                  return DropdownButtonFormField<String>(
+                    value: _selectedCreatedBy,
+                    hint: const Text(
+                      "Tüm kullanıcılar",
+                      style: TextStyle(fontSize: 14, color: Colors.black87),
+                    ),
+                    isExpanded: true,
+                    menuMaxHeight: 200,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey.shade600),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey.shade600),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.blue.shade700, width: 2),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white,
+                      isDense: true,
+                    ),
+                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    dropdownColor: Colors.white,
+                    items: [
+                      const DropdownMenuItem<String>(
+                        value: null,
+                        child: Text(
+                          "Tüm kullanıcılar",
+                          style: TextStyle(fontSize: 14, color: Colors.black87),
+                        ),
+                      ),
+                      ...uniqueUserIds.map(
+                        (userId) => DropdownMenuItem<String>(
+                          value: userId,
+                          child: Consumer(
+                            builder: (context, ref, _) {
+                              final displayNameAsync = ref.watch(loadUserDisplayNameProvider(userId));
+                              return displayNameAsync.when(
+                                data: (displayName) => Text(
+                                  displayName ?? userId,
+                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                ),
+                                loading: () => Text(
+                                  userId,
+                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                ),
+                                error: (_, __) => Text(
+                                  userId,
+                                  style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        _selectedCreatedBy = value;
+                      });
+                    },
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, __) => const SizedBox.shrink(),
+              )
+            else
+              const SizedBox.shrink(),
+
+            const SizedBox(height: 10),
+
             /// 📅 TARİH
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -239,6 +334,7 @@ class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
                       setState(() {
                         _selectedBoatType = null;
                         _selectedTaskType = null;
+                        _selectedCreatedBy = null;
                         _selectedDateRange = null;
                       });
                       Navigator.pop(context);
@@ -256,6 +352,7 @@ class _FilterBottomSheetState extends ConsumerState<FilterBottomSheet> {
                       final controller = ref.read(notifierProvider.notifier);
                       (controller as dynamic).setBoat(_selectedBoatType);
                       (controller as dynamic).setTaskType(_selectedTaskType);
+                      (controller as dynamic).setCreatedBy(_selectedCreatedBy);
                       (controller as dynamic).setDateRange(_selectedDateRange);
                       Navigator.pop(context);
                     },

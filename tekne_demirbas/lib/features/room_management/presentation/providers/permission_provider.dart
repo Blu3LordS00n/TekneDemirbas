@@ -32,7 +32,10 @@ final canAddTaskProvider = Provider.autoDispose<bool>((ref) {
 final canDeleteTaskProvider = Provider.autoDispose<bool>((ref) {
   final permissionAsync = ref.watch(currentUserPermissionProvider);
   return permissionAsync.when(
-    data: (permission) => permission?.canDeleteTask ?? false,
+    data: (permission) {
+      // Görev ekleme yetkisi olanlar da görevleri silebilir
+      return (permission?.canDeleteTask ?? false) || (permission?.canAddTask ?? false);
+    },
     loading: () => false,
     error: (_, __) => false,
   );
@@ -41,7 +44,10 @@ final canDeleteTaskProvider = Provider.autoDispose<bool>((ref) {
 final canEditTaskProvider = Provider.autoDispose<bool>((ref) {
   final permissionAsync = ref.watch(currentUserPermissionProvider);
   return permissionAsync.when(
-    data: (permission) => permission?.canEditTask ?? false,
+    data: (permission) {
+      // Görev ekleme yetkisi olanlar da görevleri düzenleyebilir
+      return (permission?.canEditTask ?? false) || (permission?.canAddTask ?? false);
+    },
     loading: () => false,
     error: (_, __) => false,
   );

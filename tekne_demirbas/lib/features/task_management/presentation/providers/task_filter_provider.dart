@@ -23,6 +23,12 @@ class TaskFilterController extends _$TaskFilterController {
     state = state.copyWith(taskType: taskValue);
   }
 
+  void setCreatedBy(String? userId) {
+    // null veya boş string ise null set et, aksi halde değeri set et
+    final userValue = (userId == null || userId.isEmpty) ? null : userId;
+    state = state.copyWith(createdBy: userValue);
+  }
+
   void setDateRange(DateTimeRange? range) {
     state = state.copyWith(dateRange: range);
   }
@@ -52,6 +58,11 @@ class AllTasksFilterController extends _$AllTasksFilterController {
   void setTaskType(String? type) {
     final taskValue = (type == null || type.isEmpty) ? null : type;
     state = state.copyWith(taskType: taskValue);
+  }
+
+  void setCreatedBy(String? userId) {
+    final userValue = (userId == null || userId.isEmpty) ? null : userId;
+    state = state.copyWith(createdBy: userValue);
   }
 
   void setDateRange(DateTimeRange? range) {
@@ -85,6 +96,11 @@ class CompletedTasksFilterController extends _$CompletedTasksFilterController {
     state = state.copyWith(taskType: taskValue);
   }
 
+  void setCreatedBy(String? userId) {
+    final userValue = (userId == null || userId.isEmpty) ? null : userId;
+    state = state.copyWith(createdBy: userValue);
+  }
+
   void setDateRange(DateTimeRange? range) {
     state = state.copyWith(dateRange: range);
   }
@@ -114,6 +130,11 @@ class IncompletedTasksFilterController extends _$IncompletedTasksFilterControlle
   void setTaskType(String? type) {
     final taskValue = (type == null || type.isEmpty) ? null : type;
     state = state.copyWith(taskType: taskValue);
+  }
+
+  void setCreatedBy(String? userId) {
+    final userValue = (userId == null || userId.isEmpty) ? null : userId;
+    state = state.copyWith(createdBy: userValue);
   }
 
   void setDateRange(DateTimeRange? range) {
