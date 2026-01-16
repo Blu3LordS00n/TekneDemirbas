@@ -5,8 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tekne_demirbas/common_widgets/async_value_ui.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
-import 'package:tekne_demirbas/features/task_management/domain/Task.dart';
+import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart';
+import 'package:tekne_demirbas/features/task_management/data/storage_repository.dart';
+import 'package:tekne_demirbas/features/task_management/domain/task.dart';
+import 'package:tekne_demirbas/features/task_management/presentation/controllers/boat_type_controller.dart';
+import 'package:tekne_demirbas/features/task_management/presentation/controllers/task_type_controller.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/firestore_controller.dart';
+import 'package:tekne_demirbas/features/task_management/presentation/providers/boat_type_provider.dart' as boat_provider;
+import 'package:tekne_demirbas/features/task_management/presentation/providers/task_type_provider.dart' as task_provider;
+
 import 'package:video_player/video_player.dart';
 
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/confirm_delete_dialog.dart';
@@ -27,32 +34,9 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  final List<String> _taskTypes = [
-    'Ic Bakim',
-    'Dis Bakim',
-    'Elektrik Sistemleri',
-    'Motor',
-  ];
   final int _lockedTaskTypeCount = 4;
   int _selectedTaskTypeIndex = 0;
 
-  final List<String> _boatTypes = [
-    'LALUNA',
-    'SC1',
-    'SC2',
-    'SC3',
-    'SC4',
-    'SC5',
-    'SC6',
-    'HERA',
-    'AMARIS',
-    'AZIZA',
-    'SUHA BEY',
-    'TIAN',
-    'KUMMSAL',
-    'ENKI',
-    'SWEET',
-  ];
   final int _lockedBoatTypeCount = 0;
   int _selectedBoatTypeIndex = 0;
 
@@ -137,18 +121,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
     final state = ref.watch(firestoreControllerProvider);
     final email = ref.watch(currentUserProvider)!.email;
 
+    final boatTypeAsync = ref.watch(boat_provider.boatTypesProvider);
+    final boatController = ref.read(boatTypeControllerProvider.notifier);
+
+    final taskTypeAsync = ref.watch(task_provider.taskTypesProvider);
+    final taskTypeController = ref.read(taskTypeControllerProvider.notifier);
+
     ref.listen<AsyncValue>(firestoreControllerProvider, (_, state) {
       state.showAlertDialogOnError(context);
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Görev Oluştur',
-          style: Appstyles.titleTextStyle.copyWith(color: Colors.white),
-        ),
-      ),
-      body: SingleChildScrollView(
+    return SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -170,80 +153,113 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
             ),
             const SizedBox(height: 20),
 
-            EditableDropdown(
-              label: "İş Türü",
-              items: _taskTypes,
-              selectedIndex: _selectedTaskTypeIndex,
-              lockedCount: _lockedTaskTypeCount,
-              onChanged: (i) => setState(() => _selectedTaskTypeIndex = i),
-              onAddNew: () async {
-                final name = await showAddItemDialog(
-                  context: context,
-                  title: "Yeni İş Türü",
-                  hint: "İş türü adı",
-                );
-                if (name != null) {
-                  setState(() {
-                    _taskTypes.add(name);
-                    _selectedTaskTypeIndex = _taskTypes.length - 1;
-                  });
+            taskTypeAsync.when(
+              data: (taskTypes) {
+                if (taskTypes.isEmpty) {
+                  return const Text("Henüz iş türü yok");
                 }
-              },
-              onDelete: (i) async {
-                final confirmed = await showConfirmDeleteDialog(
-                  context: context,
-                  itemName: _taskTypes[i],
-                );
-                if (confirmed) {
-                  setState(() {
-                    _taskTypes.removeAt(i);
-                    if (_selectedTaskTypeIndex == i) {
-                      _selectedTaskTypeIndex = 0;
-                    } else if (_selectedTaskTypeIndex > i) {
-                      _selectedTaskTypeIndex--;
+                final names = taskTypes.map((t) => t.name).toList();
+
+                return EditableDropdown(
+                  label: "İş Türü",
+                  items: names,
+                  selectedIndex: _selectedTaskTypeIndex,
+                  lockedCount: _lockedTaskTypeCount,
+
+                  onChanged: (i) {
+                    setState(() => _selectedTaskTypeIndex = i);
+                  },
+
+                  // ➕ EKLE
+                  onAddNew: () async {
+                    final name = await showAddItemDialog(
+                      context: context,
+                      title: "Yeni İş Türü",
+                      hint: "İş Türü Adı",
+                    );
+
+                    if (name != null && name.trim().isNotEmpty) {
+                      await taskTypeController.addTaskType(name.trim());
+                      setState(() {
+                        _selectedTaskTypeIndex = names.length;
+                      });
                     }
-                  });
-                }
+                  },
+
+                  // 🗑 SİL (soft delete)
+                  onDelete: (i) async {
+                    final confirmed = await showConfirmDeleteDialog(
+                      context: context,
+                      itemName: names[i],
+                    );
+
+                    if (confirmed) {
+                      await taskTypeController.deleteTaskType(taskTypes[i].id);
+
+                      if (_selectedTaskTypeIndex >= i &&
+                          _selectedTaskTypeIndex > 0) {
+                        setState(() => _selectedTaskTypeIndex--);
+                      }
+                    }
+                  },
+                );
               },
+              loading: () => const CircularProgressIndicator(),
+              error: (e, stackTrace) => Text("Hata: $e\n\nStack: $stackTrace"),
             ),
 
             SizedBox(height: SizeConfig.getProportionateHeight(5)),
 
-            EditableDropdown(
-              label: "Tekne",
-              items: _boatTypes,
-              selectedIndex: _selectedBoatTypeIndex,
-              lockedCount: _lockedBoatTypeCount,
-              onChanged: (i) => setState(() => _selectedBoatTypeIndex = i),
-              onAddNew: () async {
-                final name = await showAddItemDialog(
-                  context: context,
-                  title: "Yeni Tekne",
-                  hint: "Tekne Adı",
-                );
-                if (name != null) {
-                  setState(() {
-                    _boatTypes.add(name);
-                    _selectedBoatTypeIndex = _boatTypes.length - 1;
-                  });
-                }
-              },
-              onDelete: (i) async {
-                final confirmed = await showConfirmDeleteDialog(
-                  context: context,
-                  itemName: _boatTypes[i],
-                );
-                if (confirmed) {
-                  setState(() {
-                    _boatTypes.removeAt(i);
-                    if (_selectedBoatTypeIndex == i) {
-                      _selectedBoatTypeIndex = 0;
-                    } else if (_selectedBoatTypeIndex > i) {
-                      _selectedBoatTypeIndex--;
+            boatTypeAsync.when(
+              data: (boats) {
+                final names = boats.map((b) => b.name).toList();
+
+                return EditableDropdown(
+                  label: "Tekne",
+                  items: names,
+                  selectedIndex: _selectedBoatTypeIndex,
+                  lockedCount: 0,
+
+                  onChanged: (i) {
+                    setState(() => _selectedBoatTypeIndex = i);
+                  },
+
+                  // ➕ EKLE
+                  onAddNew: () async {
+                    final name = await showAddItemDialog(
+                      context: context,
+                      title: "Yeni Tekne",
+                      hint: "Tekne Adı",
+                    );
+
+                    if (name != null && name.trim().isNotEmpty) {
+                      await boatController.addBoat(name.trim());
+                      setState(() {
+                        _selectedBoatTypeIndex = names.length;
+                      });
                     }
-                  });
-                }
+                  },
+
+                  // 🗑 SİL (soft delete)
+                  onDelete: (i) async {
+                    final confirmed = await showConfirmDeleteDialog(
+                      context: context,
+                      itemName: names[i],
+                    );
+
+                    if (confirmed) {
+                      await boatController.deleteBoat(boats[i].id);
+
+                      if (_selectedBoatTypeIndex >= i &&
+                          _selectedBoatTypeIndex > 0) {
+                        setState(() => _selectedBoatTypeIndex--);
+                      }
+                    }
+                  },
+                );
               },
+              loading: () => const CircularProgressIndicator(),
+              error: (e, _) => Text("Hata: $e"),
             ),
 
             SizedBox(height: SizeConfig.getProportionateHeight(5)),
@@ -341,11 +357,20 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
             SizedBox(height: SizeConfig.getProportionateHeight(5)),
 
             InkWell(
-              onTap: () {
+              onTap: () async {
                 final title = _titleController.text.trim();
+                if (title.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Görev adı boş olamaz')),
+                  );
+                  return;
+                }
+
                 final description = _descriptionController.text.trim();
-                String taskType = _taskTypes[_selectedTaskTypeIndex];
-                String boatType = _boatTypes[_selectedBoatTypeIndex];
+                final taskTypes = ref.read(task_provider.taskTypesProvider).value!;
+                String taskType = taskTypes[_selectedTaskTypeIndex].name;
+                final boatTypes = ref.read(boat_provider.boatTypesProvider).value!;
+                String boatType = boatTypes[_selectedBoatTypeIndex].name;
                 String date = DateTime.now().toString();
 
                 final myTask = Task(
@@ -357,9 +382,89 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   date: date,
                 );
 
-                ref
-                    .read(firestoreControllerProvider.notifier)
+                // Önce task'ı oluştur
+                final taskId = await ref
+                    .read(firestoreRepositoryProvider)
                     .addTask(task: myTask, userId: userId);
+
+                // Medya varsa yükle
+                List<String>? imageUrls;
+                String? videoUrl;
+
+                if (_images.isNotEmpty || _video != null) {
+                  final storageRepo = ref.read(storageRepositoryProvider);
+                  
+                  // Resimleri yükle
+                  if (_images.isNotEmpty) {
+                    try {
+                      imageUrls = await storageRepo.uploadImages(_images, taskId);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Resimler yüklenirken hata: $e')),
+                      );
+                    }
+                  }
+
+                  // Videoyu yükle
+                  if (_video != null) {
+                    try {
+                      videoUrl = await storageRepo.uploadVideo(_video!, taskId);
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Video yüklenirken hata: $e')),
+                      );
+                    }
+                  }
+
+                  // Task'ı medya URL'leri ile güncelle
+                  if (imageUrls != null || videoUrl != null) {
+                    final updatedTask = myTask.copyWith(
+                      id: taskId,
+                      imageUrls: imageUrls ?? [],
+                      videoUrl: videoUrl,
+                    );
+                    await ref.read(firestoreRepositoryProvider).updateTask(
+                      task: updatedTask,
+                      taskId: taskId,
+                      userId: userId,
+                    );
+                  }
+                }
+
+                // Başarılı mesajı göster ve formu temizle
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Row(
+                        children: [
+                          const Icon(Icons.check_circle, color: Colors.white),
+                          const SizedBox(width: 12),
+                          const Expanded(
+                            child: Text(
+                              'Görev başarıyla eklendi!',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                      backgroundColor: Colors.green,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      duration: const Duration(seconds: 3),
+                    ),
+                  );
+                  
+                  _titleController.clear();
+                  _descriptionController.clear();
+                  setState(() {
+                    _images.clear();
+                    _video = null;
+                    _videoController?.dispose();
+                    _videoController = null;
+                  });
+                }
               },
               child: Container(
                 alignment: Alignment.center,
@@ -387,7 +492,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

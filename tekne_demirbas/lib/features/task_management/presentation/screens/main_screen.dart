@@ -33,12 +33,31 @@ class _MainScreenState extends State<MainScreen>
     super.dispose();
   }
 
+  String _getPageTitle(int index) {
+    switch (index) {
+      case 0:
+        return 'Görevlerim';
+      case 1:
+        return 'Tamamlanmamış Görevlerim';
+      case 2:
+        return 'Görev Oluştur';
+      case 3:
+        return 'Tamamlanmış Görevlerim';
+      case 4:
+        return 'Hesabım';
+      default:
+        return 'Ana Ekran';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     _tabController.index = currentIndex;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Ana Ekran')),
+      appBar: AppBar(
+        title: Text(_getPageTitle(currentIndex)),
+      ),
       body: TabBarView(
         controller: _tabController,
         children: const [

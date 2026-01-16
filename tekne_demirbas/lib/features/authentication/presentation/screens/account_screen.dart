@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
@@ -13,17 +12,7 @@ class AccountScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(currentUserProvider)!;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Hesabim',
-          style: Appstyles.titleTextStyle.copyWith(
-            color: Colors.white,
-            fontSize: 25,
-          ),
-        ),
-      ),
-      body: Center(
+    return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -86,7 +75,6 @@ class AccountScreen extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

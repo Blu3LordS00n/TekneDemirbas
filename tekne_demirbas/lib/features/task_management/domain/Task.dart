@@ -9,6 +9,8 @@ class Task {
   final String createdBy;
   final String date;
   final bool isComplete;
+  final List<String> imageUrls;
+  final String? videoUrl;
 
   const Task({
     this.id = '',
@@ -19,6 +21,8 @@ class Task {
     required this.createdBy,
     required this.date,
     this.isComplete = false,
+    this.imageUrls = const [],
+    this.videoUrl,
   });
 
   factory Task.fromMap(Map<String, dynamic> map, String id) {
@@ -31,6 +35,10 @@ class Task {
       createdBy: map['createdBy'] ?? '',
       date: map['date'] ?? '',
       isComplete: map['isComplete'] ?? false,
+      imageUrls: map['imageUrls'] != null 
+          ? List<String>.from(map['imageUrls']) 
+          : [],
+      videoUrl: map['videoUrl'] as String?,
     );
   }
 
@@ -43,6 +51,8 @@ class Task {
       'createdBy': createdBy,
       'date': date,
       'isComplete': isComplete,
+      'imageUrls': imageUrls,
+      'videoUrl': videoUrl,
     };
   }
 
@@ -55,6 +65,8 @@ class Task {
     String? createdBy,
     String? date,
     bool? isComplete,
+    List<String>? imageUrls,
+    String? videoUrl,
   }) {
     return Task(
       id: id ?? this.id,
@@ -65,6 +77,8 @@ class Task {
       createdBy: createdBy ?? this.createdBy,
       date: date ?? this.date,
       isComplete: isComplete ?? this.isComplete,
+      imageUrls: imageUrls ?? this.imageUrls,
+      videoUrl: videoUrl ?? this.videoUrl,
     );
   }
 

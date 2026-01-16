@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
 import 'package:tekne_demirbas/features/task_management/data/firestore_repository.dart';
-import 'package:tekne_demirbas/features/task_management/domain/Task.dart';
+import 'package:tekne_demirbas/features/task_management/domain/task.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/firestore_controller.dart';
+import 'package:tekne_demirbas/features/task_management/presentation/providers/boat_type_provider.dart' as boat_provider;
+import 'package:tekne_demirbas/features/task_management/presentation/providers/task_type_provider.dart' as task_provider;
 import 'package:tekne_demirbas/utils/appstyles.dart';
 import 'package:tekne_demirbas/utils/size_config.dart';
 
@@ -18,73 +20,298 @@ class TaskItem extends ConsumerStatefulWidget {
 
 class _TaskItemState extends ConsumerState<TaskItem> {
   void _editTask() {
-    TextEditingController titleController = TextEditingController(
-      text: widget.task.title,
-    );
-
-    TextEditingController descriptionController = TextEditingController(
-      text: widget.task.description,
-    );
+    final titleController = TextEditingController(text: widget.task.title);
+    final descriptionController = TextEditingController(text: widget.task.description);
+    String? selectedBoatType = widget.task.boatType;
+    String? selectedTaskType = widget.task.taskType;
 
     showDialog(
       context: context,
+      builder: (ctx) => Consumer(
+        builder: (context, ref, _) {
+          final boatTypeAsync = ref.watch(boat_provider.boatTypesProvider);
+          final taskTypeAsync = ref.watch(task_provider.taskTypesProvider);
+
+          return StatefulBuilder(
+            builder: (context, setDialogState) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              title: Row(
+                children: [
+                  const Icon(Icons.edit, color: Colors.green, size: 30),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Görevi Düzenle',
+                    style: Appstyles.titleTextStyle.copyWith(fontSize: 22),
+                  ),
+                ],
+              ),
+              content: SingleChildScrollView(
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Görev Adı
+                      Text(
+                        'Görev Adı',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: titleController,
+                        decoration: InputDecoration(
+                          hintText: 'Görev adını girin',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          prefixIcon: const Icon(Icons.title),
+                        ),
+                        style: Appstyles.normalTextStyle,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Görev Tanımı
+                      Text(
+                        'Görev Tanımı',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      TextField(
+                        controller: descriptionController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          hintText: 'Görev tanımını girin',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                          prefixIcon: const Icon(Icons.description),
+                        ),
+                        style: Appstyles.normalTextStyle,
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Tekne Türü
+                      Text(
+                        'Tekne Türü',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      boatTypeAsync.when(
+                        data: (boats) {
+                          final boatNames = boats.map((b) => b.name).toList();
+                          return DropdownButtonFormField<String>(
+                            value: selectedBoatType,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                              prefixIcon: const Icon(Icons.directions_boat),
+                            ),
+                            items: boatNames.map((name) {
+                              return DropdownMenuItem(
+                                value: name,
+                                child: Text(name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedBoatType = value;
+                              });
+                            },
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Text('Tekne türleri yüklenemedi'),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // İş Türü
+                      Text(
+                        'İş Türü',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      taskTypeAsync.when(
+                        data: (taskTypes) {
+                          final taskTypeNames = taskTypes.map((t) => t.name).toList();
+                          return DropdownButtonFormField<String>(
+                            value: selectedTaskType,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              filled: true,
+                              fillColor: Colors.grey[100],
+                              prefixIcon: const Icon(Icons.work),
+                            ),
+                            items: taskTypeNames.map((name) {
+                              return DropdownMenuItem(
+                                value: name,
+                                child: Text(name),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setDialogState(() {
+                                selectedTaskType = value;
+                              });
+                            },
+                          );
+                        },
+                        loading: () => const Center(child: CircularProgressIndicator()),
+                        error: (_, __) => const Text('İş türleri yüklenemedi'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Sil Butonu
+                    TextButton.icon(
+                      onPressed: () {
+                        context.pop();
+                        _showDeleteConfirmation();
+                      },
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      label: Text(
+                        'Sil',
+                        style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+                      ),
+                    ),
+                    // İptal ve Güncelle Butonları
+                    Row(
+                      children: [
+                        OutlinedButton(
+                          onPressed: () => context.pop(),
+                          style: OutlinedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text('İptal', style: Appstyles.normalTextStyle),
+                        ),
+                        const SizedBox(width: 10),
+                        // Güncelle Butonu
+                        ElevatedButton(
+                          onPressed: () {
+                            if (titleController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Görev adı boş olamaz')),
+                              );
+                              return;
+                            }
+
+                            final newTask = Task(
+                              id: widget.task.id,
+                              title: titleController.text.trim(),
+                              description: descriptionController.text.trim(),
+                              taskType: selectedTaskType ?? widget.task.taskType,
+                              boatType: selectedBoatType ?? widget.task.boatType,
+                              createdBy: widget.task.createdBy,
+                              isComplete: widget.task.isComplete,
+                              date: DateTime.now().toString(),
+                            );
+
+                            ref
+                                .read(firestoreControllerProvider.notifier)
+                                .updateTask(
+                                  task: newTask,
+                                  userId: widget.task.createdBy,
+                                  taskId: widget.task.id,
+                                );
+                            context.pop();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Güncelle',
+                            style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
       builder: (ctx) => AlertDialog(
-        icon: const Icon(Icons.edit, color: Colors.green, size: 40),
-        title: Text('Gorevi Guncelle', style: Appstyles.normalTextStyle),
-        content: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Gorev adi'),
-            ),
-            TextField(
-              controller: descriptionController,
-              decoration: const InputDecoration(labelText: 'Gorev tanimi'),
-            ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        icon: const Icon(Icons.warning, color: Colors.red, size: 50),
+        title: Text(
+          'Görevi Sil',
+          style: Appstyles.titleTextStyle.copyWith(fontSize: 22),
+        ),
+        content: Text(
+          'Bu görevi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
+          style: Appstyles.normalTextStyle,
+          textAlign: TextAlign.center,
         ),
         actions: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  context.pop();
-                },
-                child: Text('Iptal', style: Appstyles.normalTextStyle),
+          OutlinedButton(
+            onPressed: () => context.pop(),
+            style: OutlinedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-
-              SizedBox(width: SizeConfig.getProportionateWidth(20)),
-
-              ElevatedButton(
-                onPressed: () {
-                  String newTitle = titleController.text;
-                  String newDescription = descriptionController.text;
-
-                  final newTask = Task(
-                    id: widget.task.id,
-                    title: newTitle,
-                    description: newDescription,
-                    taskType: widget.task.taskType,
-                    boatType: widget.task.boatType,
-                    createdBy: widget.task.createdBy,
-                    isComplete: widget.task.isComplete,
-                    date: DateTime.now().toString(),
-                  );
-
-                  ref
-                      .read(firestoreControllerProvider.notifier)
-                      .updateTask(
-                        task: newTask,
-                        userId: widget.task.createdBy,
-                        taskId: widget.task.id,
-                      );
-                  context.pop();
-                },
-                child: Text('Guncelle', style: Appstyles.normalTextStyle),
+            ),
+            child: Text('İptal', style: Appstyles.normalTextStyle),
+          ),
+          const SizedBox(width: 10),
+          ElevatedButton(
+            onPressed: () {
+              ref
+                  .read(firestoreControllerProvider.notifier)
+                  .deleteTask(taskId: widget.task.id);
+              context.pop();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
               ),
-            ],
+            ),
+            child: Text(
+              'Sil',
+              style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
+            ),
           ),
         ],
       ),
