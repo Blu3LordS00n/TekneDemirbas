@@ -37,7 +37,11 @@ class CompletedTasksScreen extends ConsumerWidget {
       state.showAlertDialogOnError(context);
     });
 
-    return Column(
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: Appstyles.lightOceanGradient,
+      ),
+      child: Column(
         children: [
           FilterBar(filterControllerProvider: completedTasksFilterControllerProvider),
           Expanded(
@@ -60,6 +64,7 @@ class CompletedTasksScreen extends ConsumerWidget {
             ),
           ),
         ],
-      );
+      ),
+    );
   }
 }

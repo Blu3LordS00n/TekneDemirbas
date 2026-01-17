@@ -37,7 +37,11 @@ class IncompleteTasksScreen extends ConsumerWidget {
       state.showAlertDialogOnError(context);
     });
 
-    return Column(
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: Appstyles.lightOceanGradient,
+      ),
+      child: Column(
         children: [
           FilterBar(filterControllerProvider: incompletedTasksFilterControllerProvider),
           Expanded(
@@ -60,6 +64,7 @@ class IncompleteTasksScreen extends ConsumerWidget {
             ),
           ),
         ],
-      );
+      ),
+    );
   }
 }

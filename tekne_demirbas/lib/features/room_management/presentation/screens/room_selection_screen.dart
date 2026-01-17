@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -8,6 +9,7 @@ import 'package:tekne_demirbas/features/room_management/domain/room.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room_request.dart';
 import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/utils/appstyles.dart';
+import 'package:tekne_demirbas/utils/size_config.dart';
 
 class RoomSelectionScreen extends ConsumerStatefulWidget {
   const RoomSelectionScreen({super.key});
@@ -33,14 +35,34 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     final roomCode = _roomCodeController.text.trim().toUpperCase();
     if (roomCode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Oda kodu boş olamaz')),
+        SnackBar(
+          content: Text(
+            'Oda kodu boş olamaz',
+            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+          ),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+          ),
+        ),
       );
       return;
     }
     
     if (roomCode.length != 5) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Oda kodu 5 haneli olmalıdır')),
+        SnackBar(
+          content: Text(
+            'Oda kodu 5 haneli olmalıdır',
+            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+          ),
+          backgroundColor: Colors.red.shade400,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+          ),
+        ),
       );
       return;
     }
@@ -54,9 +76,16 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
       if (room == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Bu kod ile oda bulunamadı'),
-              backgroundColor: Colors.red,
+            SnackBar(
+              content: Text(
+                'Bu kod ile oda bulunamadı',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.red.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
             ),
           );
         }
@@ -80,8 +109,15 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${room.name} odasına katılım isteği gönderildi'),
-            backgroundColor: Colors.blue,
+            content: Text(
+              '${room.name} odasına katılım isteği gönderildi',
+              style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+            ),
+            backgroundColor: Appstyles.primaryBlue,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+            ),
           ),
         );
         _roomCodeController.clear();
@@ -97,36 +133,314 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     }
   }
 
+  void _showRoomActionDialog(BuildContext context, WidgetRef ref, Room room, User user) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.meeting_room, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        room.name,
+                        style: Appstyles.headingTextStyle.copyWith(
+                          color: Appstyles.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: Appstyles.oceanGradient,
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          boxShadow: Appstyles.mediumShadow,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            ref.read(selectedRoomProvider.notifier).setRoom(room.id);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            foregroundColor: Appstyles.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.login, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                'Odaya Gir',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () async {
+                          Navigator.pop(ctx);
+                          await _leaveRoom(context, ref, room.id, user.uid);
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red.shade600,
+                          side: BorderSide(color: Colors.red.shade300, width: 1.5),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          ),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.exit_to_app, size: 20),
+                            SizedBox(width: 8),
+                            Text(
+                              'Odadan Ayrıl',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _leaveRoom(BuildContext context, WidgetRef ref, String roomId, String userId) async {
+    try {
+      await ref.read(roomRepositoryProvider).removeMemberFromRoom(userId, roomId);
+      
+      // Kullanıcının permission'larını da sil
+      final permissionsSnapshot = await FirebaseFirestore.instance
+          .collection('room_permissions')
+          .where('userId', isEqualTo: userId)
+          .where('roomId', isEqualTo: roomId)
+          .get();
+      
+      for (var doc in permissionsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+      
+      // Pending request'leri de temizle
+      final requestsSnapshot = await FirebaseFirestore.instance
+          .collection('room_requests')
+          .where('userId', isEqualTo: userId)
+          .where('roomId', isEqualTo: roomId)
+          .get();
+      
+      for (var doc in requestsSnapshot.docs) {
+        await doc.reference.delete();
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Odadan ayrıldınız',
+              style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+            ),
+            backgroundColor: Colors.green.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Hata: $e',
+              style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+            ),
+            backgroundColor: Colors.red.shade400,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+            ),
+          ),
+        );
+      }
+    }
+  }
 
   void _editRoomName(BuildContext context, Room room) async {
     final controller = TextEditingController(text: room.name);
     
     final result = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Oda Adını Değiştir'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Yeni oda adı',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (controller.text.trim().isNotEmpty) {
-                Navigator.pop(ctx, controller.text.trim());
-              }
-            },
-            child: const Text('Kaydet'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Oda Adını Değiştir',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: controller,
+                      style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                      decoration: InputDecoration(
+                        hintText: 'Yeni oda adı',
+                        hintStyle: Appstyles.subtitleTextStyle,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Appstyles.white,
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: Appstyles.oceanGradient,
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                if (controller.text.trim().isNotEmpty) {
+                                  Navigator.pop(ctx, controller.text.trim());
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Kaydet',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
@@ -135,16 +449,33 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
         await ref.read(roomRepositoryProvider).updateRoomName(room.id, result);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Oda adı güncellendi'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(
+                'Oda adı güncellendi',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.green.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
             ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Hata: $e')),
+            SnackBar(
+              content: Text(
+                'Hata: $e',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.red.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
+            ),
           );
         }
       }
@@ -158,71 +489,157 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
         builder: (context, ref, _) {
           final displayNameAsync = ref.watch(loadUserDisplayNameProvider(user.uid));
           
-          return AlertDialog(
-            title: const Row(
-              children: [
-                Icon(Icons.person, color: Colors.blue),
-                SizedBox(width: 8),
-                Text('Hesap Bilgileri'),
-              ],
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
             ),
-            content: displayNameAsync.when(
-              data: (displayName) => Column(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Appstyles.white,
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+                boxShadow: Appstyles.strongShadow,
+              ),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Center(
-                    child: Icon(Icons.account_circle, color: Colors.blueGrey, size: 80),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      gradient: Appstyles.oceanGradient,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                        topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.person, color: Appstyles.white, size: 24),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Hesap Bilgileri',
+                          style: Appstyles.headingTextStyle.copyWith(
+                            color: Appstyles.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 16),
-                  _buildEditableNameRow(context, ref, user.uid, displayName ?? ''),
-                  const SizedBox(height: 16),
-                  _buildInfoRow('Email', user.email ?? 'Email yok'),
-                  const SizedBox(height: 12),
-                  _buildInfoRow('UID', user.uid),
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        displayNameAsync.when(
+                          data: (displayName) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    gradient: Appstyles.oceanGradient,
+                                    shape: BoxShape.circle,
+                                    boxShadow: Appstyles.mediumShadow,
+                                  ),
+                                  child: const Icon(Icons.account_circle, color: Appstyles.white, size: 60),
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              _buildEditableNameRow(context, ref, user.uid, displayName ?? ''),
+                              const SizedBox(height: 20),
+                              _buildInfoRow('Email', user.email ?? 'Email yok'),
+                              const SizedBox(height: 16),
+                              _buildInfoRow('UID', user.uid),
+                            ],
+                          ),
+                          loading: () => const Center(child: CircularProgressIndicator()),
+                          error: (_, __) => Text(
+                            'Hata oluştu',
+                            style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: Appstyles.textLight,
+                                  side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                  ),
+                                ),
+                                child: const Text('Kapat', style: TextStyle(fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.red.shade400, Colors.red.shade600],
+                                  ),
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                  boxShadow: Appstyles.mediumShadow,
+                                ),
+                                child: ElevatedButton(
+                                  onPressed: () async {
+                                    Navigator.pop(ctx);
+                                    final userId = user.uid;
+                                    
+                                    // Oda seçimini temizle
+                                    ref.read(selectedRoomProvider.notifier).clear();
+                                    
+                                    // Tüm provider'ları invalidate et
+                                    ref.invalidate(selectedRoomProvider);
+                                    if (userId != null) {
+                                      ref.invalidate(loadUserRoomsProvider(userId));
+                                      ref.invalidate(loadUserRoomRequestsProvider(userId));
+                                    }
+                                    
+                                    // Çıkış yap
+                                    await ref.read(authRepositoryProvider).signOut();
+                                    
+                                    // Biraz bekle ki Firebase state güncellensin
+                                    await Future.delayed(const Duration(milliseconds: 500));
+                                    
+                                    // Sign in ekranına yönlendir
+                                    if (context.mounted) {
+                                      context.go('/signIn');
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.transparent,
+                                    shadowColor: Colors.transparent,
+                                    foregroundColor: Appstyles.white,
+                                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: const Text(
+                                    'Çıkış Yap',
+                                    style: TextStyle(fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, __) => const Text('Hata oluştu'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Kapat'),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  final userId = user.uid;
-                  
-                  // Oda seçimini temizle
-                  ref.read(selectedRoomProvider.notifier).clear();
-                  
-                  // Tüm provider'ları invalidate et
-                  ref.invalidate(selectedRoomProvider);
-                  if (userId != null) {
-                    ref.invalidate(loadUserRoomsProvider(userId));
-                    ref.invalidate(loadUserRoomRequestsProvider(userId));
-                  }
-                  
-                  // Çıkış yap
-                  await ref.read(authRepositoryProvider).signOut();
-                  
-                  // Biraz bekle ki Firebase state güncellensin
-                  await Future.delayed(const Duration(milliseconds: 500));
-                  
-                  // Sign in ekranına yönlendir
-                  if (context.mounted) {
-                    context.go('/signIn');
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Çıkış Yap'),
-              ),
-            ],
           );
         },
       ),
@@ -233,11 +650,9 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'İsim',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+          style: Appstyles.subtitleTextStyle.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -254,17 +669,23 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
                 ),
                 child: Text(
                   currentName.isEmpty ? 'İsim belirtilmemiş' : currentName,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: currentName.isEmpty ? Colors.grey : Colors.black,
+                  style: Appstyles.normalTextStyle.copyWith(
+                    color: currentName.isEmpty ? Appstyles.textLight : Appstyles.textDark,
                   ),
                 ),
               ),
             ),
             const SizedBox(width: 8),
-            IconButton(
-              icon: const Icon(Icons.edit, color: Colors.blue),
-              onPressed: () => _editDisplayName(context, ref, userId, currentName),
+            Container(
+              decoration: BoxDecoration(
+                gradient: Appstyles.oceanGradient,
+                shape: BoxShape.circle,
+                boxShadow: Appstyles.softShadow,
+              ),
+              child: IconButton(
+                icon: const Icon(Icons.edit, color: Appstyles.white),
+                onPressed: () => _editDisplayName(context, ref, userId, currentName),
+              ),
             ),
           ],
         ),
@@ -277,28 +698,125 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     
     final result = await showDialog<String>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('İsmini Düzenle'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'İsminizi girin',
-            border: OutlineInputBorder(),
-          ),
-          autofocus: true,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx, controller.text.trim());
-            },
-            child: const Text('Kaydet'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.edit, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'İsmini Düzenle',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: controller,
+                      style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                      decoration: InputDecoration(
+                        hintText: 'İsminizi girin',
+                        hintStyle: Appstyles.subtitleTextStyle,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: Appstyles.white,
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: Appstyles.oceanGradient,
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(ctx, controller.text.trim());
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Kaydet',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
@@ -307,16 +825,33 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
         await ref.read(roomRepositoryProvider).updateUserDisplayName(userId, result);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('İsim güncellendi'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(
+                'İsim güncellendi',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.green.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
             ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Hata: $e')),
+            SnackBar(
+              content: Text(
+                'Hata: $e',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.red.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
+            ),
           );
         }
       }
@@ -329,9 +864,7 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+          style: Appstyles.subtitleTextStyle.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -348,10 +881,9 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
           ),
           child: SelectableText(
             value,
-            style: TextStyle(
-              fontSize: 16,
+            style: Appstyles.normalTextStyle.copyWith(
               fontWeight: isCode ? FontWeight.bold : FontWeight.normal,
-              color: isCode ? Colors.blue[900] : Colors.black,
+              color: isCode ? Appstyles.primaryBlue : Appstyles.textDark,
             ),
           ),
         ),
@@ -359,28 +891,230 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     );
   }
 
+  void _showLeaveRoomConfirmation(BuildContext context, WidgetRef ref, Room room, String userId) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.orange.shade400, Colors.orange.shade600],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.exit_to_app, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Odadan Ayrıl',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${room.name} odasından ayrılmak istediğinize emin misiniz?\n\nBu odaya olan erişiminiz kesilecektir.',
+                      style: Appstyles.normalTextStyle.copyWith(
+                        color: Appstyles.textDark,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.orange.shade400, Colors.orange.shade600],
+                              ),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Evet, Ayrıl',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      await _leaveRoom(context, ref, room.id, userId);
+    }
+  }
+
   void _showDeleteRoomConfirmation(BuildContext context, Room room) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Odayı Sil'),
-        content: Text(
-          '${room.name} odasını silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz ve odadaki tüm görevler silinecektir.',
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('İptal'),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Evet, Sil'),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.red.shade400, Colors.red.shade600],
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Odayı Sil',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${room.name} odasını silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz ve odadaki tüm görevler silinecektir.',
+                      style: Appstyles.normalTextStyle.copyWith(
+                        color: Appstyles.textDark,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.red.shade400, Colors.red.shade600],
+                              ),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Evet, Sil',
+                                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
 
@@ -389,16 +1123,33 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
         await ref.read(roomRepositoryProvider).deleteRoom(room.id);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Oda silindi'),
-              backgroundColor: Colors.green,
+            SnackBar(
+              content: Text(
+                'Oda silindi',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.green.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
             ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Hata: $e')),
+            SnackBar(
+              content: Text(
+                'Hata: $e',
+                style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+              ),
+              backgroundColor: Colors.red.shade400,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+              ),
+            ),
           );
         }
       }
@@ -408,6 +1159,7 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     final userAsync = ref.watch(currentUserProvider);
     
     return userAsync.when(
@@ -445,97 +1197,161 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     }
 
     return Scaffold(
+      backgroundColor: Appstyles.lightGray,
       appBar: AppBar(
-        title: const Text('Oda Seç'),
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () => _showProfilePopup(context, user),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              // Oda seçimini temizle
-              ref.read(selectedRoomProvider.notifier).clear();
-              
-              // Tüm provider'ları invalidate et
-              ref.invalidate(selectedRoomProvider);
-              ref.invalidate(loadUserRoomsProvider(user.uid));
-              ref.invalidate(loadUserRoomRequestsProvider(user.uid));
-              
-              // Çıkış yap
-              await ref.read(authRepositoryProvider).signOut();
-              
-              // Biraz bekle ki Firebase state güncellensin
-              await Future.delayed(const Duration(milliseconds: 500));
-              
-              // Sign in ekranına yönlendir
-              if (context.mounted) {
-                context.go('/signIn');
-              }
-            },
+        elevation: 0,
+        backgroundColor: Appstyles.white,
+        title: Text(
+          'Oda Seç',
+          style: Appstyles.headingTextStyle.copyWith(
+            color: Appstyles.primaryBlue,
+            fontSize: 20,
           ),
-        ],
+        ),
+        automaticallyImplyLeading: false,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Appstyles.lightBlue,
+            shape: BoxShape.circle,
+            boxShadow: Appstyles.softShadow,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.person, color: Appstyles.primaryBlue),
+            onPressed: () => _showProfilePopup(context, user),
+          ),
+        ),
+        iconTheme: IconThemeData(color: Appstyles.primaryBlue),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Butonlar - Üst kısımda ortalanmış
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () => _showCreateRoomDialog(context, user),
-                  icon: const Icon(Icons.add_business, size: 22),
-                  label: const Text(
-                    'Oda Oluştur',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: Appstyles.lightOceanGradient,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Butonlar - Üst kısımda ortalanmış
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: Appstyles.oceanGradient,
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                        boxShadow: Appstyles.mediumShadow,
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showCreateRoomDialog(context, user),
+                        icon: const Icon(Icons.add_business, size: 22),
+                        label: Text(
+                          'Oda Oluştur',
+                          style: Appstyles.titleTextStyle.copyWith(
+                            color: Appstyles.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                          foregroundColor: Appstyles.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                ElevatedButton.icon(
-                  onPressed: () => _showJoinRoomDialog(context, user),
-                  icon: const Icon(Icons.login, size: 22),
-                  label: const Text(
-                    'Odaya Katıl',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                    backgroundColor: Colors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                        ),
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                        boxShadow: Appstyles.mediumShadow,
+                      ),
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showJoinRoomDialog(context, user),
+                        icon: const Icon(Icons.login, size: 22),
+                        label: Text(
+                          'Odaya Katıl',
+                          style: Appstyles.titleTextStyle.copyWith(
+                            color: Appstyles.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                          foregroundColor: Appstyles.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          ),
+                          elevation: 0,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 24),
+                ],
+              ),
+            const SizedBox(height: 32),
             // Benim Odalarım
-            Text(
-              'Benim Odalarım',
-              style: Appstyles.titleTextStyle.copyWith(fontSize: 18),
+            Container(
+              padding: const EdgeInsets.only(bottom: 12),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: Appstyles.oceanGradient,
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                    ),
+                    child: const Icon(Icons.meeting_room, color: Appstyles.white, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Benim Odalarım',
+                    style: Appstyles.headingTextStyle.copyWith(
+                      color: Appstyles.primaryBlue,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             userRooms.when(
               data: (rooms) {
                 if (rooms.isEmpty) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Henüz bir odaya katılmadınız'),
+                  return Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Appstyles.white,
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                      border: Border.all(color: Appstyles.lightBlue, width: 1.5),
+                      boxShadow: Appstyles.softShadow,
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Henüz bir odaya katılmadınız',
+                        style: Appstyles.normalTextStyle.copyWith(
+                          color: Appstyles.textLight,
+                        ),
+                      ),
                     ),
                   );
                 }
@@ -551,57 +1367,123 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
                     if (!isMember && !isOwner) {
                       return const SizedBox.shrink();
                     }
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 8),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          child: Text(room.name[0].toUpperCase()),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: Appstyles.white,
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                        border: Border.all(
+                          color: isOwner ? Appstyles.primaryBlue : Appstyles.lightBlue,
+                          width: isOwner ? 2 : 1.5,
                         ),
-                        title: Text(room.name),
+                        boxShadow: Appstyles.softShadow,
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            gradient: isOwner ? Appstyles.oceanGradient : LinearGradient(
+                              colors: [Appstyles.lightBlue, Appstyles.white],
+                            ),
+                            shape: BoxShape.circle,
+                            boxShadow: Appstyles.softShadow,
+                          ),
+                          child: Center(
+                            child: Text(
+                              room.name[0].toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: isOwner ? Appstyles.white : Appstyles.primaryBlue,
+                              ),
+                            ),
+                          ),
+                        ),
+                        title: Text(
+                          room.name,
+                          style: Appstyles.titleTextStyle.copyWith(
+                            color: Appstyles.textDark,
+                          ),
+                        ),
                         subtitle: Text(
                           isOwner ? 'Sahip' : 'Üye • ${room.memberIds.length} üye',
+                          style: Appstyles.subtitleTextStyle,
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            if (isOwner)
-                              PopupMenuButton<String>(
-                                icon: const Icon(Icons.more_vert),
-                                onSelected: (value) {
-                                  if (value == 'edit') {
-                                    _editRoomName(context, room);
-                                  } else if (value == 'delete') {
-                                    _showDeleteRoomConfirmation(context, room);
-                                  }
-                                },
-                                itemBuilder: (context) => [
-                                  const PopupMenuItem(
+                            PopupMenuButton<String>(
+                              icon: Icon(Icons.more_vert, color: Appstyles.primaryBlue),
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  _editRoomName(context, room);
+                                } else if (value == 'delete') {
+                                  _showDeleteRoomConfirmation(context, room);
+                                } else if (value == 'leave') {
+                                  _showLeaveRoomConfirmation(context, ref, room, user.uid);
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                if (isOwner) ...[
+                                  PopupMenuItem(
                                     value: 'edit',
                                     child: Row(
                                       children: [
-                                        Icon(Icons.edit),
-                                        SizedBox(width: 8),
-                                        Text('Oda Adını Değiştir'),
+                                        Icon(Icons.edit, color: Appstyles.primaryBlue),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Oda Adını Değiştir',
+                                          style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                                        ),
                                       ],
                                     ),
                                   ),
-                                  const PopupMenuItem(
+                                  PopupMenuItem(
                                     value: 'delete',
                                     child: Row(
                                       children: [
-                                        Icon(Icons.delete, color: Colors.red),
-                                        SizedBox(width: 8),
-                                        Text('Odayı Sil', style: TextStyle(color: Colors.red)),
+                                        const Icon(Icons.delete, color: Colors.red),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Odayı Sil',
+                                          style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ] else ...[
+                                  PopupMenuItem(
+                                    value: 'leave',
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.exit_to_app, color: Colors.red),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'Odadan Ayrıl',
+                                          style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+                                        ),
                                       ],
                                     ),
                                   ),
                                 ],
+                              ],
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: Appstyles.oceanGradient,
+                                shape: BoxShape.circle,
+                                boxShadow: Appstyles.softShadow,
                               ),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_forward),
-                              onPressed: () {
-                                ref.read(selectedRoomProvider.notifier).setRoom(room.id);
-                              },
+                              child: IconButton(
+                                icon: const Icon(Icons.arrow_forward, color: Appstyles.white),
+                                onPressed: () {
+                                  // Mavi ok her zaman odaya girişi temsil eder
+                                  ref.read(selectedRoomProvider.notifier).setRoom(room.id);
+                                },
+                              ),
                             ),
                           ],
                         ),
@@ -613,7 +1495,7 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Text('Hata: $e'),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
             // Bekleyen İsteklerim
             userRequests.when(
@@ -627,17 +1509,55 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Bekleyen İsteklerim',
-                      style: Appstyles.titleTextStyle.copyWith(fontSize: 18),
+                    Container(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                            ),
+                            child: const Icon(Icons.pending, color: Colors.orange, size: 20),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Bekleyen İsteklerim',
+                            style: Appstyles.headingTextStyle.copyWith(
+                              color: Appstyles.primaryBlue,
+                              fontSize: 20,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 12),
-                    ...pendingRequests.map((request) => Card(
-                          margin: const EdgeInsets.only(bottom: 8),
+                    ...pendingRequests.map((request) => Container(
+                          margin: const EdgeInsets.only(bottom: 12),
+                          decoration: BoxDecoration(
+                            color: Appstyles.white,
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                            border: Border.all(color: Colors.orange.shade300, width: 1.5),
+                            boxShadow: Appstyles.softShadow,
+                          ),
                           child: ListTile(
-                            leading: const Icon(Icons.pending, color: Colors.orange),
-                            title: Text(request.roomName),
-                            subtitle: const Text('Beklemede'),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.orange.shade50,
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.pending, color: Colors.orange),
+                            ),
+                            title: Text(request.roomName, style: Appstyles.titleTextStyle),
+                            subtitle: Text('Beklemede', style: Appstyles.subtitleTextStyle),
                           ),
                         )),
                   ],
@@ -646,7 +1566,8 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
               loading: () => const SizedBox.shrink(),
               error: (_, __) => const SizedBox.shrink(),
             ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -656,51 +1577,139 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     _roomNameController.clear();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.add_business, color: Colors.blue),
-            SizedBox(width: 8),
-            Text('Yeni Oda Oluştur'),
-          ],
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
         ),
-        content: TextField(
-          controller: _roomNameController,
-          decoration: InputDecoration(
-            hintText: 'Oda adı',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            prefixIcon: const Icon(Icons.meeting_room),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
           ),
-          autofocus: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(Icons.add_business, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Yeni Oda Oluştur',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _roomNameController,
+                      style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                      decoration: InputDecoration(
+                        hintText: 'Oda adı',
+                        hintStyle: Appstyles.subtitleTextStyle,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2),
+                        ),
+                        prefixIcon: const Icon(Icons.meeting_room, color: Appstyles.primaryBlue),
+                        filled: true,
+                        fillColor: Appstyles.white,
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              _roomNameController.clear();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: Appstyles.oceanGradient,
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _isCreatingRoom ? null : () {
+                                Navigator.pop(ctx);
+                                _createRoom(user);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isCreatingRoom
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Appstyles.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Oluştur',
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _roomNameController.clear();
-            },
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: _isCreatingRoom ? null : () {
-              Navigator.pop(ctx);
-              _createRoom(user);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
-            ),
-            child: _isCreatingRoom
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Oluştur'),
-          ),
-        ],
       ),
     );
   }
@@ -749,63 +1758,154 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
     _roomCodeController.clear();
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.login, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Odaya Katıl'),
-          ],
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _roomCodeController,
-              decoration: InputDecoration(
-                hintText: 'Oda kodu (örn: A1B2C)',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+            boxShadow: Appstyles.strongShadow,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                    topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                  ),
                 ),
-                prefixIcon: const Icon(Icons.vpn_key),
+                child: Row(
+                  children: [
+                    const Icon(Icons.login, color: Appstyles.white, size: 24),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Odaya Katıl',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.white,
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              textCapitalization: TextCapitalization.characters,
-              maxLength: 5,
-              autofocus: true,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              '5 haneli oda kodunu girin',
-              style: TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: _roomCodeController,
+                      style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                      textCapitalization: TextCapitalization.characters,
+                      maxLength: 5,
+                      decoration: InputDecoration(
+                        hintText: 'Oda kodu (örn: A1B2C)',
+                        hintStyle: Appstyles.subtitleTextStyle,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2),
+                        ),
+                        prefixIcon: const Icon(Icons.vpn_key, color: Appstyles.primaryBlue),
+                        filled: true,
+                        fillColor: Appstyles.white,
+                      ),
+                      autofocus: true,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '5 haneli oda kodunu girin',
+                      style: Appstyles.subtitleTextStyle,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.pop(ctx);
+                              _roomCodeController.clear();
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Appstyles.textLight,
+                              side: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                            ),
+                            child: const Text('İptal', style: TextStyle(fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton(
+                              onPressed: _isJoiningRoom ? null : () {
+                                Navigator.pop(ctx);
+                                _joinRoomByCode(user);
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                foregroundColor: Appstyles.white,
+                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: _isJoiningRoom
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Appstyles.white,
+                                      ),
+                                    )
+                                  : const Text(
+                                      'Katıl',
+                                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+                                    ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _roomCodeController.clear();
-            },
-            child: const Text('İptal'),
-          ),
-          ElevatedButton(
-            onPressed: _isJoiningRoom ? null : () {
-              Navigator.pop(ctx);
-              _joinRoomByCode(user);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-            ),
-            child: _isJoiningRoom
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Text('Katıl'),
-          ),
-        ],
       ),
     );
   }

@@ -42,7 +42,11 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
       state.showAlertDialogOnError(context);
     });
 
-    return Column(
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: Appstyles.lightOceanGradient,
+      ),
+      child: Column(
         children: [
           FilterBar(filterControllerProvider: allTasksFilterControllerProvider),
           Expanded(
@@ -65,6 +69,7 @@ class _AllTasksScreenState extends ConsumerState<AllTasksScreen> {
             ),
           ),
         ],
-      );
+      ),
+    );
   }
 }

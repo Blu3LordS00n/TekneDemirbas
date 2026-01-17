@@ -18,26 +18,35 @@ class CommonTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      keyboardType: textInputType,
-      controller: controller,
-      obscureText: obscureText ?? false,
-      decoration: InputDecoration(
-        hintText: hintText,
-        hintStyle: Appstyles.normalTextStyle,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30),
-          borderSide: const BorderSide(color: Colors.grey, width: 1.0),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+        boxShadow: Appstyles.softShadow,
+      ),
+      child: TextFormField(
+        keyboardType: textInputType,
+        controller: controller,
+        obscureText: obscureText ?? false,
+        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+        decoration: InputDecoration(
+          hintText: hintText,
+          hintStyle: Appstyles.subtitleTextStyle,
+          filled: true,
+          fillColor: Appstyles.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+            borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+            borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+            borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2.0),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(30.0),
-          borderSide: const BorderSide(color: Colors.grey, width: 1.0),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 10.0),
       ),
     );
   }

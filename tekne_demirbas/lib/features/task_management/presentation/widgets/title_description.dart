@@ -24,17 +24,63 @@ class TitleDescription extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: Appstyles.headingTextStyle.copyWith(fontSize: 18)),
-        SizedBox(height: SizeConfig.getProportionateHeight(10)),
-        TextFormField(
-          controller: controller,
-          decoration: InputDecoration(
-            hintText: hintText,
-            filled: true,
-            fillColor: const Color.fromARGB(255, 227, 227, 227),
-            prefixIcon: Icon(prefixIcon),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15.0),
+        Container(
+          padding: const EdgeInsets.only(bottom: 12),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                ),
+                child: Icon(prefixIcon, color: Appstyles.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                title,
+                style: Appstyles.headingTextStyle.copyWith(
+                  color: Appstyles.primaryBlue,
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: SizeConfig.getProportionateHeight(16)),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+            boxShadow: Appstyles.softShadow,
+          ),
+          child: TextFormField(
+            controller: controller,
+            maxLines: maxLines,
+            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: Appstyles.subtitleTextStyle,
+              filled: true,
+              fillColor: Appstyles.white,
+              prefixIcon: Icon(prefixIcon, color: Appstyles.primaryBlue),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                borderSide: BorderSide(color: Appstyles.lightBlue, width: 1.5),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                borderSide: BorderSide(color: Appstyles.primaryBlue, width: 2),
+              ),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
             ),
           ),
         ),

@@ -28,15 +28,46 @@ class EditableDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: Appstyles.headingTextStyle.copyWith(fontSize: 18)),
-        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.only(bottom: 12),
+          decoration: const BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  gradient: Appstyles.oceanGradient,
+                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                ),
+                child: Icon(
+                  label.contains('İş') ? Icons.work : Icons.directions_boat,
+                  color: Appstyles.white,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                label,
+                style: Appstyles.headingTextStyle.copyWith(
+                  color: Appstyles.primaryBlue,
+                  fontSize: 20,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
 
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: Colors.grey.shade200,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade400),
+            color: Appstyles.white,
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+            border: Border.all(color: Appstyles.lightBlue, width: 1.5),
+            boxShadow: Appstyles.softShadow,
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton2<int>(
@@ -45,38 +76,73 @@ class EditableDropdown extends StatelessWidget {
               dropdownStyleData: DropdownStyleData(
                 maxHeight: 300,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
+                  color: Appstyles.white,
+                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                  boxShadow: Appstyles.mediumShadow,
                 ),
               ),
-              iconStyleData: const IconStyleData(
-                icon: Icon(Icons.keyboard_arrow_down),
+              iconStyleData: IconStyleData(
+                icon: const Icon(Icons.keyboard_arrow_down, color: Appstyles.primaryBlue),
               ),
-              style: const TextStyle(color: Colors.black87, fontSize: 16),
+              style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
               items: [
                 for (int i = 0; i < items.length; i++)
-                  DropdownMenuItem(value: i, child: Text(items[i])),
+                  DropdownMenuItem(
+                    value: i,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Text(
+                        items[i],
+                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                      ),
+                    ),
+                  ),
 
-                const DropdownMenuItem(
+                DropdownMenuItem(
                   value: -1,
-                  child: Row(
-                    children: [
-                      Icon(Icons.add, color: Colors.green),
-                      SizedBox(width: 8),
-                      Text("Yeni ekle"),
-                    ],
+                  child: Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                      ),
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.add, color: Appstyles.white),
+                        SizedBox(width: 8),
+                        Text(
+                          "Yeni ekle",
+                          style: TextStyle(color: Appstyles.white, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
                 if (selectedIndex >= lockedCount)
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: -2,
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text("Seçili olanı sil"),
-                      ],
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.shade50,
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                        border: Border.all(color: Colors.red.shade300, width: 1.5),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.delete, color: Colors.red),
+                          SizedBox(width: 8),
+                          Text(
+                            "Seçili olanı sil",
+                            style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
               ],

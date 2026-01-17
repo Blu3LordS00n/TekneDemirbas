@@ -85,22 +85,80 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   Future<void> _showMediaTypePicker({required bool fromCamera}) async {
     final type = await showModalBottomSheet<String>(
       context: context,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo),
-                title: const Text("Fotoğraf"),
-                onTap: () => Navigator.pop(context, "image"),
-              ),
-              ListTile(
-                leading: const Icon(Icons.videocam),
-                title: const Text("Video"),
-                onTap: () => Navigator.pop(context, "video"),
-              ),
-            ],
+        return Container(
+          decoration: BoxDecoration(
+            color: Appstyles.white,
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+              topRight: Radius.circular(Appstyles.borderRadiusLarge),
+            ),
+            boxShadow: Appstyles.strongShadow,
+          ),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          gradient: Appstyles.oceanGradient,
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                        ),
+                        child: const Icon(Icons.perm_media, color: Appstyles.white, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "Medya Türü Seç",
+                        style: Appstyles.headingTextStyle.copyWith(
+                          color: Appstyles.primaryBlue,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: Appstyles.oceanGradient,
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                    ),
+                    child: const Icon(Icons.photo, color: Appstyles.white),
+                  ),
+                  title: Text("Fotoğraf", style: Appstyles.titleTextStyle),
+                  onTap: () => Navigator.pop(context, "image"),
+                ),
+                ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                      ),
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                    ),
+                    child: const Icon(Icons.videocam, color: Appstyles.white),
+                  ),
+                  title: Text("Video", style: Appstyles.titleTextStyle),
+                  onTap: () => Navigator.pop(context, "video"),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
           ),
         );
       },
@@ -122,7 +180,12 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
     final userAsync = ref.watch(currentUserProvider);
     final user = userAsync.value;
     if (user == null) {
-      return const Center(child: Text('Kullanıcı bulunamadı'));
+      return Center(
+        child: Text(
+          'Kullanıcı bulunamadı',
+          style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+        ),
+      );
     }
     final userId = user.uid;
     final state = ref.watch(firestoreControllerProvider);
@@ -143,28 +206,60 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
     
     // Yetki yoksa mesaj göster
     if (!canAddTask) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.block, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              'Görev ekleme yetkiniz yok',
-              style: TextStyle(fontSize: 18, color: Colors.grey),
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: Appstyles.lightOceanGradient,
+        ),
+        child: Center(
+          child: Container(
+            margin: const EdgeInsets.all(32),
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: Appstyles.white,
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+              boxShadow: Appstyles.strongShadow,
             ),
-            SizedBox(height: 8),
-            Text(
-              'Lütfen oda yöneticisinden yetki isteyin',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    shape: BoxShape.circle,
+                    boxShadow: Appstyles.softShadow,
+                  ),
+                  child: const Icon(Icons.block, size: 64, color: Colors.red),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Görev Ekleme Yetkiniz Yok',
+                  style: Appstyles.headingTextStyle.copyWith(
+                    color: Appstyles.textDark,
+                    fontSize: 20,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Lütfen oda yöneticisinden yetki isteyin',
+                  style: Appstyles.normalTextStyle.copyWith(
+                    color: Appstyles.textLight,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       );
     }
 
-    return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(10, 20, 10, 20),
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: Appstyles.lightOceanGradient,
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -188,7 +283,10 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
             taskTypeAsync.when(
               data: (taskTypes) {
                 if (taskTypes.isEmpty) {
-                  return const Text("Henüz iş türü yok");
+                  return Text(
+                    "Henüz iş türü yok",
+                    style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textLight),
+                  );
                 }
                 final names = taskTypes.map((t) => t.name).toList();
 
@@ -237,7 +335,10 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 );
               },
               loading: () => const CircularProgressIndicator(),
-              error: (e, stackTrace) => Text("Hata: $e\n\nStack: $stackTrace"),
+              error: (e, stackTrace) => Text(
+                "Hata: $e\n\nStack: $stackTrace",
+                style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+              ),
             ),
 
             SizedBox(height: SizeConfig.getProportionateHeight(5)),
@@ -291,29 +392,75 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 );
               },
               loading: () => const CircularProgressIndicator(),
-              error: (e, _) => Text("Hata: $e"),
+              error: (e, _) => Text(
+                "Hata: $e",
+                style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+              ),
             ),
 
-            SizedBox(height: SizeConfig.getProportionateHeight(5)),
+            SizedBox(height: SizeConfig.getProportionateHeight(20)),
 
-            Text(
-              "Medya",
-              style: Appstyles.headingTextStyle.copyWith(fontSize: 18),
+            Container(
+              padding: const EdgeInsets.only(bottom: 12),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Appstyles.lightBlue, width: 2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      gradient: Appstyles.oceanGradient,
+                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                    ),
+                    child: const Icon(Icons.perm_media, color: Appstyles.white, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    "Medya",
+                    style: Appstyles.headingTextStyle.copyWith(
+                      color: Appstyles.primaryBlue,
+                      fontSize: 20,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 16),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  iconSize: 50,
-                  icon: const Icon(Icons.camera_alt),
-                  onPressed: () => _showMediaTypePicker(fromCamera: true),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: Appstyles.oceanGradient,
+                    shape: BoxShape.circle,
+                    boxShadow: Appstyles.mediumShadow,
+                  ),
+                  child: IconButton(
+                    iconSize: 50,
+                    icon: const Icon(Icons.camera_alt, color: Appstyles.white),
+                    onPressed: () => _showMediaTypePicker(fromCamera: true),
+                  ),
                 ),
-                IconButton(
-                  iconSize: 50,
-                  icon: const Icon(Icons.photo_library),
-                  onPressed: () => _showMediaTypePicker(fromCamera: false),
+                const SizedBox(width: 24),
+                Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: Appstyles.mediumShadow,
+                  ),
+                  child: IconButton(
+                    iconSize: 50,
+                    icon: const Icon(Icons.photo_library, color: Appstyles.white),
+                    onPressed: () => _showMediaTypePicker(fromCamera: false),
+                  ),
                 ),
               ],
             ),
@@ -322,81 +469,133 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
             if (_images.isNotEmpty)
               SizedBox(
-                height: 100,
+                height: 120,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: _images.length,
                   itemBuilder: (context, index) {
-                    return Stack(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.all(8),
-                          width: 100,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            image: DecorationImage(
-                              image: FileImage(_images[index]),
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          right: 4,
-                          top: 4,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _images.removeAt(index);
-                              });
-                            },
-                            child: const CircleAvatar(
-                              radius: 12,
-                              backgroundColor: Colors.red,
-                              child: Icon(
-                                Icons.close,
-                                size: 14,
-                                color: Colors.white,
+                    return Container(
+                      margin: const EdgeInsets.only(right: 12),
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 120,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              border: Border.all(color: Appstyles.lightBlue, width: 2),
+                              boxShadow: Appstyles.softShadow,
+                              image: DecorationImage(
+                                image: FileImage(_images[index]),
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          Positioned(
+                            right: 4,
+                            top: 4,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _images.removeAt(index);
+                                });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                  boxShadow: Appstyles.softShadow,
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  size: 18,
+                                  color: Colors.white,
+                                ),
+                                padding: const EdgeInsets.all(4),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
               ),
 
             if (_videoController != null)
-              Column(
-                children: [
-                  AspectRatio(
-                    aspectRatio: _videoController!.value.aspectRatio,
-                    child: VideoPlayer(_videoController!),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      _videoController?.dispose();
-                      setState(() {
-                        _videoController = null;
-                        _video = null;
-                      });
-                    },
-                  ),
-                ],
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                  border: Border.all(color: Appstyles.lightBlue, width: 2),
+                  boxShadow: Appstyles.softShadow,
+                ),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(Appstyles.borderRadiusSmall - 2),
+                        topRight: Radius.circular(Appstyles.borderRadiusSmall - 2),
+                      ),
+                      child: AspectRatio(
+                        aspectRatio: _videoController!.value.aspectRatio,
+                        child: VideoPlayer(_videoController!),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.red.shade50,
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                _videoController?.dispose();
+                                setState(() {
+                                  _videoController = null;
+                                  _video = null;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
-            SizedBox(height: SizeConfig.getProportionateHeight(5)),
+            SizedBox(height: SizeConfig.getProportionateHeight(32)),
 
-            InkWell(
-              onTap: () async {
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                gradient: Appstyles.oceanGradient,
+                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                boxShadow: Appstyles.mediumShadow,
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () async {
                 // Yetki kontrolü
                 final canAdd = ref.read(canAddTaskProvider);
                 if (!canAdd) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Görev ekleme yetkiniz yok'),
-                      backgroundColor: Colors.red,
+                    SnackBar(
+                      content: Text(
+                        'Görev ekleme yetkiniz yok',
+                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                      ),
+                      backgroundColor: Colors.red.shade400,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                      ),
                     ),
                   );
                   return;
@@ -405,7 +604,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 final title = _titleController.text.trim();
                 if (title.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Görev adı boş olamaz')),
+                    SnackBar(
+                      content: Text(
+                        'Görev adı boş olamaz',
+                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                      ),
+                      backgroundColor: Colors.red.shade400,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                      ),
+                    ),
                   );
                   return;
                 }
@@ -420,7 +629,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 final roomId = ref.read(selectedRoomProvider);
                 if (roomId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Lütfen bir oda seçin')),
+                    SnackBar(
+                      content: Text(
+                        'Lütfen bir oda seçin',
+                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                      ),
+                      backgroundColor: Colors.red.shade400,
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                      ),
+                    ),
                   );
                   return;
                 }
@@ -453,7 +672,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                       imageUrls = await storageRepo.uploadImages(_images, taskId);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Resimler yüklenirken hata: $e')),
+                        SnackBar(
+                          content: Text(
+                            'Resimler yüklenirken hata: $e',
+                            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                          ),
+                          backgroundColor: Colors.red.shade400,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          ),
+                        ),
                       );
                     }
                   }
@@ -464,7 +693,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                       videoUrl = await storageRepo.uploadVideo(_video!, taskId);
                     } catch (e) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Video yüklenirken hata: $e')),
+                        SnackBar(
+                          content: Text(
+                            'Video yüklenirken hata: $e',
+                            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                          ),
+                          backgroundColor: Colors.red.shade400,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          ),
+                        ),
                       );
                     }
                   }
@@ -490,17 +729,21 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     SnackBar(
                       content: Row(
                         children: [
-                          const Icon(Icons.check_circle, color: Colors.white),
+                          const Icon(Icons.check_circle, color: Appstyles.white),
                           const SizedBox(width: 12),
-                          const Expanded(
+                          Expanded(
                             child: Text(
                               'Görev başarıyla eklendi!',
-                              style: TextStyle(fontSize: 16),
+                              style: Appstyles.normalTextStyle.copyWith(
+                                color: Appstyles.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      backgroundColor: Colors.green,
+                      backgroundColor: Colors.green.shade400,
                       behavior: SnackBarBehavior.floating,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -518,33 +761,35 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     _videoController = null;
                   });
                 }
-              },
-              child: Container(
-                alignment: Alignment.center,
-                height: SizeConfig.getProportionateHeight(50),
-                width: SizeConfig.screenWidth,
-                decoration: BoxDecoration(
-                  color: Colors.greenAccent,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: state.isLoading
-                    ? const CircularProgressIndicator()
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Gorev Ekle',
-                            style: Appstyles.normalTextStyle.copyWith(
-                              fontSize: 24,
-                              color: Colors.white,
-                            ),
+                  },
+                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                  child: Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    child: state.isLoading
+                        ? const CircularProgressIndicator(color: Appstyles.white)
+                        : Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.add_task, color: Appstyles.white, size: 28),
+                              const SizedBox(width: 12),
+                              Text(
+                                'Görev Ekle',
+                                style: Appstyles.titleTextStyle.copyWith(
+                                  fontSize: 20,
+                                  color: Appstyles.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                  ),
+                ),
               ),
             ),
           ],
         ),
+      ),
       );
   }
 }

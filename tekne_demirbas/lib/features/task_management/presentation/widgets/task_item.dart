@@ -66,7 +66,11 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                   const SizedBox(width: 10),
                   Text(
                     'Görevi Düzenle',
-                    style: Appstyles.titleTextStyle.copyWith(fontSize: 22),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
                   ),
                 ],
               ),
@@ -80,9 +84,10 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       // Görev Adı
                       Text(
                         'Görev Adı',
-                        style: Appstyles.normalTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -97,16 +102,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           fillColor: Colors.grey[100],
                           prefixIcon: const Icon(Icons.title),
                         ),
-                        style: Appstyles.normalTextStyle,
+                        style: const TextStyle(color: Colors.black87),
                       ),
                       const SizedBox(height: 20),
 
                       // Görev Tanımı
                       Text(
                         'Görev Tanımı',
-                        style: Appstyles.normalTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -122,16 +128,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           fillColor: Colors.grey[100],
                           prefixIcon: const Icon(Icons.description),
                         ),
-                        style: Appstyles.normalTextStyle,
+                        style: const TextStyle(color: Colors.black87),
                       ),
                       const SizedBox(height: 20),
 
                       // Tekne Türü
                       Text(
                         'Tekne Türü',
-                        style: Appstyles.normalTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -151,7 +158,10 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             items: boatNames.map((name) {
                               return DropdownMenuItem(
                                 value: name,
-                                child: Text(name),
+                                child: Text(
+                                  name,
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -162,16 +172,20 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           );
                         },
                         loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (_, __) => const Text('Tekne türleri yüklenemedi'),
+                        error: (_, __) => const Text(
+                          'Tekne türleri yüklenemedi',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                       const SizedBox(height: 20),
 
                       // İş Türü
                       Text(
                         'İş Türü',
-                        style: Appstyles.normalTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -191,7 +205,10 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             items: taskTypeNames.map((name) {
                               return DropdownMenuItem(
                                 value: name,
-                                child: Text(name),
+                                child: Text(
+                                  name,
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) {
@@ -202,16 +219,20 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           );
                         },
                         loading: () => const Center(child: CircularProgressIndicator()),
-                        error: (_, __) => const Text('İş türleri yüklenemedi'),
+                        error: (_, __) => const Text(
+                          'İş türleri yüklenemedi',
+                          style: TextStyle(color: Colors.red),
+                        ),
                       ),
                       const SizedBox(height: 20),
                       
                       // Medya Ekleme Bölümü
                       Text(
                         'Medya',
-                        style: Appstyles.normalTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
+                          color: Colors.black87,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -230,13 +251,13 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         ListTile(
-                                          leading: const Icon(Icons.photo),
-                                          title: const Text("Fotoğraf"),
+                                          leading: const Icon(Icons.photo, color: Appstyles.primaryBlue),
+                                          title: const Text("Fotoğraf", style: TextStyle(color: Colors.black87)),
                                           onTap: () => Navigator.pop(context, "image"),
                                         ),
                                         ListTile(
-                                          leading: const Icon(Icons.videocam),
-                                          title: const Text("Video"),
+                                          leading: const Icon(Icons.videocam, color: Appstyles.primaryBlue),
+                                          title: const Text("Video", style: TextStyle(color: Colors.black87)),
                                           onTap: () => Navigator.pop(context, "video"),
                                         ),
                                       ],
@@ -282,13 +303,13 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         ListTile(
-                                          leading: const Icon(Icons.photo),
-                                          title: const Text("Fotoğraf"),
+                                          leading: const Icon(Icons.photo, color: Appstyles.primaryBlue),
+                                          title: const Text("Fotoğraf", style: TextStyle(color: Colors.black87)),
                                           onTap: () => Navigator.pop(context, "image"),
                                         ),
                                         ListTile(
-                                          leading: const Icon(Icons.videocam),
-                                          title: const Text("Video"),
+                                          leading: const Icon(Icons.videocam, color: Appstyles.primaryBlue),
+                                          title: const Text("Video", style: TextStyle(color: Colors.black87)),
                                           onTap: () => Navigator.pop(context, "video"),
                                         ),
                                       ],
@@ -413,9 +434,9 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               _showDeleteConfirmation();
                             },
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            label: Text(
+                            label: const Text(
                               'Sil',
-                              style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+                              style: TextStyle(color: Colors.red),
                             ),
                           )
                         else
@@ -430,7 +451,10 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              child: Text('İptal', style: Appstyles.normalTextStyle),
+                              child: const Text(
+                              'İptal',
+                              style: TextStyle(color: Colors.black87),
+                            ),
                             ),
                             const SizedBox(width: 10),
                             // Güncelle Butonu - sadece canEdit varsa göster
@@ -439,7 +463,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           onPressed: () async {
                             if (titleController.text.trim().isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Görev adı boş olamaz')),
+                                SnackBar(
+                          content: const Text(
+                            'Görev adı boş olamaz',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                  ),
+                                ),
                               );
                               return;
                             }
@@ -459,7 +493,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Resimler yüklenirken hata: $e')),
+                                      SnackBar(
+                                        content: Text(
+                                          'Resimler yüklenirken hata: $e',
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                        backgroundColor: Colors.red.shade400,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                        ),
+                                      ),
                                     );
                                   }
                                   return;
@@ -473,7 +517,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Video yüklenirken hata: $e')),
+                                      SnackBar(
+                                        content: Text(
+                                          'Video yüklenirken hata: $e',
+                                          style: const TextStyle(color: Colors.white),
+                                        ),
+                                        backgroundColor: Colors.red.shade400,
+                                        behavior: SnackBarBehavior.floating,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                        ),
+                                      ),
                                     );
                                   }
                                   return;
@@ -520,9 +574,16 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             if (context.mounted) {
                               context.pop();
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Görev başarıyla güncellendi!'),
-                                  backgroundColor: Colors.green,
+                                SnackBar(
+                                  content: const Text(
+                                    'Görev başarıyla güncellendi!',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.green.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                  ),
                                 ),
                               );
                             }
@@ -533,9 +594,9 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
-                                child: Text(
+                                child: const Text(
                                   'Güncelle',
-                                  style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
+                                  style: TextStyle(color: Colors.white),
                                 ),
                               )
                             else
@@ -564,13 +625,13 @@ class _TaskItemState extends ConsumerState<TaskItem> {
           borderRadius: BorderRadius.circular(20),
         ),
         icon: const Icon(Icons.warning, color: Colors.red, size: 50),
-        title: Text(
+        title: const Text(
           'Görevi Sil',
-          style: Appstyles.titleTextStyle.copyWith(fontSize: 22),
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black87),
         ),
-        content: Text(
+        content: const Text(
           'Bu görevi silmek istediğinize emin misiniz? Bu işlem geri alınamaz.',
-          style: Appstyles.normalTextStyle,
+          style: TextStyle(color: Colors.black87),
           textAlign: TextAlign.center,
         ),
         actions: [
@@ -581,7 +642,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: Text('İptal', style: Appstyles.normalTextStyle),
+            child: const Text('İptal', style: TextStyle(color: Colors.black87)),
           ),
           const SizedBox(width: 10),
           ElevatedButton(
@@ -597,9 +658,9 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
-            child: Text(
+            child: const Text(
               'Sil',
-              style: Appstyles.normalTextStyle.copyWith(color: Colors.white),
+              style: TextStyle(color: Colors.white),
             ),
           ),
         ],
@@ -611,27 +672,31 @@ class _TaskItemState extends ConsumerState<TaskItem> {
     showDialog(
       context: context,
       builder: (ctx) {
-        return Dialog(
+          return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
           ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
           child: Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(context).size.height * 0.9,
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
+            decoration: BoxDecoration(
+              color: Appstyles.white,
+              borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
+              boxShadow: Appstyles.strongShadow,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Başlık
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade700,
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
+                    gradient: Appstyles.oceanGradient,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(Appstyles.borderRadiusLarge),
+                      topRight: Radius.circular(Appstyles.borderRadiusLarge),
                     ),
+                    boxShadow: Appstyles.softShadow,
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -639,7 +704,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       Expanded(
                         child: Text(
                           widget.task.title,
-                          style: Appstyles.headingTextStyle.copyWith(
+                          style: const TextStyle(
                             fontSize: 22,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -648,7 +713,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       ),
                       IconButton(
                         icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.of(ctx).pop(),
+                        onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
@@ -657,41 +722,48 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                 // İçerik
                 Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Açıklama
                         Text(
                           'Açıklama',
-                          style: Appstyles.normalTextStyle.copyWith(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          widget.task.description,
-                          style: Appstyles.normalTextStyle.copyWith(
-                            fontSize: 16,
-                            color: Colors.black87,
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Appstyles.lightGray,
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                          ),
+                          child: Text(
+                            widget.task.description,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         
                         // Etiketler
                         Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
+                          spacing: 12,
+                          runSpacing: 12,
                           children: [
                             _Tag(
                               text: widget.task.boatType,
-                              color: Colors.green,
+                              color: Appstyles.secondaryBlue,
                             ),
                             _Tag(
                               text: widget.task.taskType,
-                              color: Colors.blue,
+                              color: Appstyles.primaryBlue,
                             ),
                             Consumer(
                               builder: (context, ref, _) {
@@ -702,42 +774,42 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                 return displayNameAsync.when(
                                   data: (displayName) => _Tag(
                                     text: displayName ?? (isEmail ? widget.task.createdByUsername : widget.task.createdBy),
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                   loading: () => _Tag(
                                     text: 'Yükleniyor...',
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                   error: (_, __) => _Tag(
                                     text: isEmail ? widget.task.createdByUsername : widget.task.createdBy,
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                 );
                               },
                             ),
                             _Tag(
                               text: widget.task.formattedDate,
-                              color: Colors.orange,
+                              color: Appstyles.darkBlue,
                             ),
                             _Tag(
                               text: widget.task.isComplete ? 'Tamamlandı' : 'Devam Ediyor',
-                              color: widget.task.isComplete ? Colors.green : Colors.red,
+                              color: widget.task.isComplete ? Appstyles.secondaryBlue : Colors.red.shade300,
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                         
                         // Resimler
                         if (widget.task.imageUrls.isNotEmpty) ...[
                           Text(
                             'Resimler',
-                            style: Appstyles.normalTextStyle.copyWith(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                           SizedBox(
                             height: 200,
                             child: ListView.builder(
@@ -762,7 +834,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                               top: 0,
                                               right: 0,
                                               child: IconButton(
-                                                icon: const Icon(Icons.close, color: Colors.white),
+                                                icon: const Icon(Icons.close, color: Appstyles.white),
                                                 onPressed: () => Navigator.of(ctx).pop(),
                                               ),
                                             ),
@@ -772,14 +844,15 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                     );
                                   },
                                   child: Container(
-                                    margin: const EdgeInsets.only(right: 10),
+                                    margin: const EdgeInsets.only(right: 12),
                                     width: 200,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: Colors.grey.shade300),
+                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                      border: Border.all(color: Appstyles.lightBlue, width: 2),
+                                      boxShadow: Appstyles.softShadow,
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
                                       child: Image.network(
                                         widget.task.imageUrls[index],
                                         fit: BoxFit.cover,
@@ -790,27 +863,28 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               },
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 24),
                         ],
                         
                         // Video
                         if (widget.task.videoUrl != null) ...[
                           Text(
                             'Video',
-                            style: Appstyles.normalTextStyle.copyWith(
+                            style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 12),
                           Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              border: Border.all(color: Appstyles.lightBlue, width: 2),
+                              boxShadow: Appstyles.softShadow,
                             ),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
                               child: AspectRatio(
                                 aspectRatio: 16 / 9,
                                 child: VideoPlayerWidget(
@@ -839,11 +913,25 @@ class _TaskItemState extends ConsumerState<TaskItem> {
     return GestureDetector(
       onTap: _showTaskDetail,
       child: Container(
-        margin: const EdgeInsets.all(10),
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: Colors.black,
+          borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+          gradient: widget.task.isComplete 
+              ? LinearGradient(
+                  colors: [Appstyles.lightBlue.withOpacity(0.3), Appstyles.white],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: widget.task.isComplete ? null : Appstyles.white,
+          boxShadow: Appstyles.softShadow,
+          border: Border.all(
+            color: widget.task.isComplete 
+                ? Appstyles.secondaryBlue.withOpacity(0.3)
+                : Appstyles.lightBlue,
+            width: 1.5,
+          ),
         ),
         child: Row(
         children: [
@@ -857,14 +945,15 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                     Expanded(
                       child: Text(
                         widget.task.title,
-                        style: Appstyles.headingTextStyle.copyWith(
+                        style: const TextStyle(
                           fontSize: 18,
-                          color: Colors.white,
+                          color: Colors.black87,
+                          fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    _Tag(text: widget.task.formattedDate, color: Colors.orange),
+                    _Tag(text: widget.task.formattedDate, color: Appstyles.darkBlue),
                   ],
                 ),
 
@@ -875,8 +964,8 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                     Expanded(
                       child: Text(
                         widget.task.description,
-                        style: Appstyles.normalTextStyle.copyWith(
-                          color: Colors.white,
+                        style: const TextStyle(
+                          color: Colors.black54,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -884,14 +973,14 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                     ),
 
                     GestureDetector(
-                      onTap: () {}, // Checkbox tıklamasını durdur
-                      child:                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {}, // Parent GestureDetector'ın event'ini durdur
                       child: Transform.scale(
-                        scale: 1.8,
+                        scale: 1.3,
                         child: Checkbox(
                           value: widget.task.isComplete,
+                          activeColor: Appstyles.secondaryBlue,
+                          checkColor: Appstyles.white,
                           onChanged: (bool? value) {
                             if (value == null) return;
                             
@@ -899,9 +988,16 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             final canEdit = ref.read(canEditTaskProvider);
                             if (!canEdit) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Görev durumunu değiştirme yetkiniz yok. Sadece görüntüleme yetkiniz var.'),
-                                  backgroundColor: Colors.red,
+                                SnackBar(
+                                  content: const Text(
+                                    'Görev durumunu değiştirme yetkiniz yok. Sadece görüntüleme yetkiniz var.',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  backgroundColor: Colors.red.shade400,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                  ),
                                 ),
                               );
                               return;
@@ -916,7 +1012,6 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           },
                         ),
                       ),
-                    ),
                     ),
                   ],
                 ),
@@ -933,12 +1028,12 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           children: [
                             _Tag(
                               text: widget.task.boatType,
-                              color: Colors.green,
+                              color: Appstyles.secondaryBlue,
                             ),
-                            const SizedBox(width: 15),
+                            const SizedBox(width: 12),
                             _Tag(
                               text: widget.task.taskType,
-                              color: Colors.blue,
+                              color: Appstyles.primaryBlue,
                             ),
                             const SizedBox(width: 15),
                             Consumer(
@@ -952,15 +1047,15 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                 return displayNameAsync.when(
                                   data: (displayName) => _Tag(
                                     text: displayName ?? (isEmail ? widget.task.createdByUsername : widget.task.createdBy),
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                   loading: () => _Tag(
                                     text: 'Yükleniyor...',
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                   error: (_, __) => _Tag(
                                     text: isEmail ? widget.task.createdByUsername : widget.task.createdBy,
-                                    color: Colors.purple,
+                                    color: Appstyles.accentBlue,
                                   ),
                                 );
                               },
@@ -984,15 +1079,17 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           onTap: canEdit ? _editTask : null,
                           child: Container(
                             height: SizeConfig.getProportionateHeight(40),
-                            padding: const EdgeInsets.all(5),
+                            width: SizeConfig.getProportionateHeight(40),
                             decoration: BoxDecoration(
-                              color: canEdit ? Colors.green : Colors.grey,
+                              gradient: canEdit ? Appstyles.oceanGradient : null,
+                              color: canEdit ? null : Appstyles.textLight,
                               shape: BoxShape.circle,
+                              boxShadow: Appstyles.softShadow,
                             ),
                             child: const Icon(
                               Icons.edit,
-                              color: Colors.white,
-                              size: 30.0,
+                              color: Appstyles.white,
+                              size: 20.0,
                             ),
                           ),
                         );
@@ -1026,9 +1123,10 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         text.toUpperCase(),
-        style: Appstyles.normalTextStyle.copyWith(
+        style: const TextStyle(
           color: Colors.white,
           fontSize: 12,
+          fontWeight: FontWeight.w500,
         ),
       ),
     );

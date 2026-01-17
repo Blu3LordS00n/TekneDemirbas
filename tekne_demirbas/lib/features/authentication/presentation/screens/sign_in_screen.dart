@@ -73,71 +73,113 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     return SafeArea(
       child: Scaffold(
-        body: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.getProportionateWidth(10),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Giris yap', style: Appstyles.titleTextStyle),
-                  SizedBox(height: SizeConfig.getProportionateHeight(25)),
-                  CommonTextField(
-                    hintText: 'Mail adresi',
-                    textInputType: TextInputType.emailAddress,
-                    obscureText: false,
-                    controller: _emailEditingController,
-                  ),
-                  SizedBox(height: SizeConfig.getProportionateHeight(10)),
-                  CommonTextField(
-                    hintText: 'Sifre',
-                    textInputType: TextInputType.text,
-                    obscureText: true,
-                    controller: _passwordController,
-                  ),
-                  SizedBox(height: SizeConfig.getProportionateHeight(25)),
-                  InkWell(
-                    onTap: _validateDetails,
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: SizeConfig.getProportionateHeight(50),
-                      width: SizeConfig.screenWidth,
+        body: Container(
+          decoration: const BoxDecoration(
+            gradient: Appstyles.lightOceanGradient,
+          ),
+          child: Center(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: SizeConfig.getProportionateWidth(24),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo/Icon Area
+                    Container(
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 43, 253, 2),
-                        borderRadius: BorderRadius.circular(20.0),
+                        color: Appstyles.white,
+                        shape: BoxShape.circle,
+                        boxShadow: Appstyles.mediumShadow,
                       ),
-                      child: state.isLoading
-                          ? const CircularProgressIndicator()
-                          : Text(
-                              'Giris yap',
-                              style: Appstyles.normalTextStyle.copyWith(
-                                color: Colors.white,
-                                fontSize: SizeConfig.getProportionateHeight(20),
-                              ),
-                            ),
+                      child: const Icon(
+                        Icons.sailing,
+                        size: 64,
+                        color: Appstyles.primaryBlue,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: SizeConfig.getProportionateHeight(40)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Hesabın yok mu?', style: Appstyles.normalTextStyle),
-                      GestureDetector(
-                        onTap: () {
-                          context.goNamed(AppRoutes.register.name);
-                        },
-                        child: Text(
-                          ' Kayıt ol!',
-                          style: Appstyles.normalTextStyle.copyWith(
-                            color: Colors.blue,
+                    SizedBox(height: SizeConfig.getProportionateHeight(32)),
+                    Text(
+                      'Hoş Geldiniz',
+                      style: Appstyles.headingTextStyle.copyWith(
+                        color: Appstyles.primaryBlue,
+                      ),
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateHeight(8)),
+                    Text(
+                      'Giriş yapın ve devam edin',
+                      style: Appstyles.subtitleTextStyle,
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateHeight(32)),
+                    CommonTextField(
+                      hintText: 'Mail adresi',
+                      textInputType: TextInputType.emailAddress,
+                      obscureText: false,
+                      controller: _emailEditingController,
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateHeight(16)),
+                    CommonTextField(
+                      hintText: 'Şifre',
+                      textInputType: TextInputType.text,
+                      obscureText: true,
+                      controller: _passwordController,
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateHeight(32)),
+                    Container(
+                      width: double.infinity,
+                      height: SizeConfig.getProportionateHeight(56),
+                      decoration: BoxDecoration(
+                        gradient: Appstyles.oceanGradient,
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                        boxShadow: Appstyles.mediumShadow,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: state.isLoading ? null : _validateDetails,
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: state.isLoading
+                                ? const CircularProgressIndicator(color: Appstyles.white)
+                                : Text(
+                                    'Giriş Yap',
+                                    style: Appstyles.titleTextStyle.copyWith(
+                                      color: Appstyles.white,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    SizedBox(height: SizeConfig.getProportionateHeight(24)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Hesabın yok mu?',
+                          style: Appstyles.normalTextStyle,
+                        ),
+                        const SizedBox(width: 4),
+                        GestureDetector(
+                          onTap: () {
+                            context.goNamed(AppRoutes.register.name);
+                          },
+                          child: Text(
+                            'Kayıt ol',
+                            style: Appstyles.normalTextStyle.copyWith(
+                              color: Appstyles.primaryBlue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

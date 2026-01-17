@@ -13,6 +13,8 @@ import 'package:tekne_demirbas/features/task_management/presentation/screens/com
 import 'package:tekne_demirbas/features/task_management/presentation/screens/incomplete_tasks_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/room_management_dialog.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/room_requests_dialog.dart';
+import 'package:tekne_demirbas/utils/appstyles.dart';
+import 'package:tekne_demirbas/utils/size_config.dart';
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -49,11 +51,11 @@ class _MainScreenState extends ConsumerState<MainScreen>
       case 0:
         return 'Görevlerim';
       case 1:
-        return 'Tamamlanmamış Görevlerim';
+        return 'Devam Eden';
       case 2:
         return 'Görev Oluştur';
       case 3:
-        return 'Tamamlanmış Görevlerim';
+        return 'Tamamlanan';
       default:
         return 'Ana Ekran';
     }
@@ -61,19 +63,39 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   Widget build(BuildContext context) {
+    SizeConfig.init(context);
     final roomId = ref.watch(selectedRoomProvider);
     final roomAsync = roomId != null ? ref.watch(loadRoomProvider(roomId)) : null;
 
     final currentUserAsync = ref.watch(currentUserProvider);
     
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () => _showAccountDialog(context, ref),
-          tooltip: 'Hesabım',
+        elevation: 0,
+        backgroundColor: Appstyles.white,
+        leading: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Appstyles.lightBlue,
+            shape: BoxShape.circle,
+            boxShadow: Appstyles.softShadow,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.person),
+            color: Appstyles.primaryBlue,
+            onPressed: () => _showAccountDialog(context, ref),
+            tooltip: 'Hesabım',
+          ),
         ),
-        title: Text(_getPageTitle(currentIndex)),
+        title: Text(
+          _getPageTitle(currentIndex),
+          style: Appstyles.headingTextStyle.copyWith(
+            color: Appstyles.primaryBlue,
+            fontSize: 20,
+          ),
+        ),
+        iconTheme: IconThemeData(color: Appstyles.primaryBlue),
         actions: [
           // Oda Seçimi
           roomAsync?.when(
@@ -85,20 +107,57 @@ class _MainScreenState extends ConsumerState<MainScreen>
                   : null;
 
               return PopupMenuButton<String>(
-                tooltip: 'Oda Seç',
+                tooltip: 'Oda Bilgileri',
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: pendingRequestsAsync?.when(
-                        data: (count) => count > 0
-                            ? Badge(
-                                label: Text('$count'),
-                                child: const Icon(Icons.meeting_room),
-                              )
-                            : const Icon(Icons.meeting_room),
-                        loading: () => const Icon(Icons.meeting_room),
-                        error: (_, __) => const Icon(Icons.meeting_room),
-                      ) ??
-                      const Icon(Icons.meeting_room),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Appstyles.lightBlue,
+                      shape: BoxShape.circle,
+                      boxShadow: Appstyles.softShadow,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: pendingRequestsAsync?.when(
+                            data: (count) => count > 0
+                                ? Badge(
+                                    label: Text(
+                                      '$count',
+                                      style: const TextStyle(
+                                        color: Appstyles.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.info_outline,
+                                      color: Appstyles.primaryBlue,
+                                      size: 24,
+                                    ),
+                                  )
+                                : const Icon(
+                                    Icons.info_outline,
+                                    color: Appstyles.primaryBlue,
+                                    size: 24,
+                                  ),
+                            loading: () => const Icon(
+                              Icons.info_outline,
+                              color: Appstyles.primaryBlue,
+                              size: 24,
+                            ),
+                            error: (_, __) => const Icon(
+                              Icons.info_outline,
+                              color: Appstyles.primaryBlue,
+                              size: 24,
+                            ),
+                          ) ??
+                          const Icon(
+                            Icons.info_outline,
+                            color: Appstyles.primaryBlue,
+                            size: 24,
+                          ),
+                    ),
+                  ),
                 ),
                 onSelected: (value) {
                   if (value == 'exit') {
@@ -124,21 +183,27 @@ class _MainScreenState extends ConsumerState<MainScreen>
                   return [
                     PopupMenuItem(
                       value: 'info',
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.info),
-                          SizedBox(width: 8),
-                          Text('Oda Bilgileri'),
+                          Icon(Icons.info, color: Appstyles.primaryBlue),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Oda Bilgileri',
+                            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                          ),
                         ],
                       ),
                     ),
                     PopupMenuItem(
                       value: 'exit',
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(Icons.exit_to_app),
-                          SizedBox(width: 8),
-                          Text('Odadan Çık'),
+                          Icon(Icons.swap_horiz, color: Appstyles.primaryBlue),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Oda Değiştir',
+                            style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                          ),
                         ],
                       ),
                     ),
@@ -150,36 +215,54 @@ class _MainScreenState extends ConsumerState<MainScreen>
                                     children: [
                                       count > 0
                                           ? Badge(
-                                              label: Text('$count'),
-                                              child: const Icon(Icons.notifications),
+                                              label: Text(
+                                                '$count',
+                                                style: Appstyles.normalTextStyle.copyWith(
+                                                  color: Appstyles.white,
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              child: Icon(Icons.notifications, color: Appstyles.primaryBlue),
                                             )
-                                          : const Icon(Icons.notifications),
+                                          : Icon(Icons.notifications, color: Appstyles.primaryBlue),
                                       const SizedBox(width: 8),
-                                      const Text('İstekler'),
+                                      Text(
+                                        'İstekler',
+                                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                                      ),
                                     ],
                                   ),
-                              loading: () => const Row(
+                              loading: () => Row(
                                     children: [
-                                      Icon(Icons.notifications),
-                                      SizedBox(width: 8),
-                                      Text('İstekler'),
+                                      Icon(Icons.notifications, color: Appstyles.primaryBlue),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'İstekler',
+                                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                                      ),
                                     ],
                                   ),
-                              error: (_, __) => const Row(
+                              error: (_, __) => Row(
                                     children: [
-                                      Icon(Icons.notifications),
-                                      SizedBox(width: 8),
-                                      Text('İstekler'),
+                                      Icon(Icons.notifications, color: Appstyles.primaryBlue),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        'İstekler',
+                                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                                      ),
                                     ],
                                   ),
                             ) ??
-                            const Row(
-                              children: [
-                                Icon(Icons.notifications),
-                                SizedBox(width: 8),
-                                Text('İstekler'),
-                              ],
-                            ),
+                                Row(
+                                  children: [
+                                    Icon(Icons.notifications, color: Appstyles.primaryBlue),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'İstekler',
+                                      style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textDark),
+                                    ),
+                                  ],
+                                ),
                       ),
                     if (room != null)
                       PopupMenuItem(
@@ -208,55 +291,82 @@ class _MainScreenState extends ConsumerState<MainScreen>
               icon: const Icon(Icons.error),
               onPressed: () => context.go('/roomSelection'),
             ),
-          ) ?? IconButton(
-            icon: const Icon(Icons.meeting_room),
-            tooltip: 'Oda Seç',
-            onPressed: () => context.go('/roomSelection'),
+          ) ?? Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Appstyles.lightBlue,
+              shape: BoxShape.circle,
+              boxShadow: Appstyles.softShadow,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.info_outline),
+              color: Appstyles.primaryBlue,
+              tooltip: 'Oda Seç',
+              onPressed: () => context.go('/roomSelection'),
+            ),
           ),
         ],
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          AllTasksScreen(),
-          IncompleteTasksScreen(),
-          AddTasksScreen(),
-          CompletedTasksScreen(),
-        ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: Appstyles.lightOceanGradient,
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          children: const [
+            AllTasksScreen(),
+            IncompleteTasksScreen(),
+            AddTasksScreen(),
+            CompletedTasksScreen(),
+          ],
+        ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: currentIndex,
-        onTap: (value) {
-          setState(() {
-            currentIndex = value;
-          });
-          _tabController.animateTo(value);
-        },
-        iconSize: 20.0,
-        elevation: 5.0,
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: 'Ana Sayfa',
-            activeIcon: Icon(Icons.home),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Appstyles.white,
+          boxShadow: Appstyles.mediumShadow,
+        ),
+        child: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (value) {
+            setState(() {
+              currentIndex = value;
+            });
+            _tabController.animateTo(value);
+          },
+          iconSize: 24.0,
+          elevation: 0,
+          type: BottomNavigationBarType.fixed,
+          selectedItemColor: Appstyles.primaryBlue,
+          unselectedItemColor: Appstyles.textLight,
+          selectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 12,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dangerous_outlined),
-            label: 'Tamamlanmamis',
-            activeIcon: Icon(Icons.dangerous),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Ekle',
-            activeIcon: Icon(Icons.add),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.check_box_outlined),
-            label: 'Tamamlanmis',
-            activeIcon: Icon(Icons.check_box),
-          ),
-        ],
+          backgroundColor: Appstyles.white,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              label: 'Ana Sayfa',
+              activeIcon: Icon(Icons.home),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.warning_amber_outlined),
+              label: 'Devam Eden',
+              activeIcon: Icon(Icons.warning_amber),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_outline),
+              label: 'Ekle',
+              activeIcon: Icon(Icons.add_circle),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle_outline),
+              label: 'Tamamlanan',
+              activeIcon: Icon(Icons.check_circle),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -315,9 +425,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.grey,
+          style: Appstyles.subtitleTextStyle.copyWith(
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -334,10 +442,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
           ),
           child: SelectableText(
             value,
-            style: TextStyle(
-              fontSize: 16,
+            style: Appstyles.normalTextStyle.copyWith(
               fontWeight: isCode ? FontWeight.bold : FontWeight.normal,
-              color: isCode ? Colors.blue[900] : Colors.black,
+              color: isCode ? Appstyles.primaryBlue : Appstyles.textDark,
             ),
           ),
         ),
