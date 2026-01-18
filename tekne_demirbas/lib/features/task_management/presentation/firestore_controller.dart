@@ -76,9 +76,23 @@ class FirestoreController extends _$FirestoreController {
     
     state = const AsyncLoading();
     final fireStoreRepository = ref.read(firestoreRepositoryProvider);
+    final storageRepository = ref.read(storageRepositoryProvider);
 
     state = await AsyncValue.guard(
-      () => fireStoreRepository.deleteTask(taskId: taskId),
+      () async {
+        // Önce Firestore'dan görevi sil
+        await fireStoreRepository.deleteTask(taskId: taskId);
+        
+        // Sonra Storage'dan medya dosyalarını sil
+        try {
+          await storageRepository.deleteTaskFiles(taskId);
+        } catch (e) {
+          // Storage silme hatası görev silme işlemini durdurmaz
+          // Çünkü Firestore'dan görev zaten silindi
+          // Loglama yapılabilir ama kullanıcıya gösterilmeyebilir
+          print('Storage dosyaları silinirken hata: $e');
+        }
+      },
     );
   }
 }

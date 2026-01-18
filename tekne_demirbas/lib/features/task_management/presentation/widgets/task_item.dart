@@ -1016,7 +1016,84 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                   ],
                 ),
 
-                SizedBox(height: SizeConfig.getProportionateHeight(20)),
+                // Medya Preview
+                if (widget.task.imageUrls.isNotEmpty || widget.task.videoUrl != null) ...[
+                  SizedBox(height: SizeConfig.getProportionateHeight(12)),
+                  SizedBox(
+                    height: 60,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: (widget.task.imageUrls.length) + (widget.task.videoUrl != null ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        // Video varsa ve son eleman ise video göster
+                        if (widget.task.videoUrl != null && index == widget.task.imageUrls.length) {
+                          return Container(
+                            margin: const EdgeInsets.only(right: 8),
+                            width: 60,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              border: Border.all(color: Appstyles.lightBlue, width: 1.5),
+                              color: Colors.black.withOpacity(0.1),
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.videocam,
+                                    color: Appstyles.primaryBlue,
+                                    size: 24,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        
+                        // Resim göster
+                        return Container(
+                          margin: const EdgeInsets.only(right: 8),
+                          width: 60,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                            border: Border.all(color: Appstyles.lightBlue, width: 1.5),
+                            boxShadow: Appstyles.softShadow,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                            child: Image.network(
+                              widget.task.imageUrls[index],
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  color: Appstyles.lightGray,
+                                  child: const Icon(Icons.broken_image, color: Colors.grey),
+                                );
+                              },
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  color: Appstyles.lightGray,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      value: loadingProgress.expectedTotalBytes != null
+                                          ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                          : null,
+                                      strokeWidth: 2,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+
+                SizedBox(height: SizeConfig.getProportionateHeight(12)),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
