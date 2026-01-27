@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
 import 'package:tekne_demirbas/features/authentication/presentation/controllers/auth_controller.dart';
 import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
@@ -15,6 +16,21 @@ import 'package:tekne_demirbas/features/task_management/presentation/widgets/roo
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/room_requests_dialog.dart';
 import 'package:tekne_demirbas/utils/appstyles.dart';
 import 'package:tekne_demirbas/utils/size_config.dart';
+
+part 'main_screen.g.dart';
+
+// TabController provider'ı
+@riverpod
+class TabControllerState extends _$TabControllerState {
+  @override
+  TabController? build() {
+    return null;
+  }
+
+  void setTabController(TabController? controller) {
+    state = controller;
+  }
+}
 
 class MainScreen extends ConsumerStatefulWidget {
   const MainScreen({super.key});
@@ -31,17 +47,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   @override
   void initState() {
+    super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(() {
       setState(() {
         currentIndex = _tabController.index;
       });
     });
-    super.initState();
   }
 
   @override
   void dispose() {
+    // Provider'dan temizle
+    ref.read(tabControllerStateProvider.notifier).setTabController(null);
     _tabController.dispose();
     super.dispose();
   }
@@ -64,6 +82,12 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   Widget build(BuildContext context) {
     SizeConfig.init(context);
+    
+    // TabController'ı provider'a kaydet
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(tabControllerStateProvider.notifier).setTabController(_tabController);
+    });
+    
     final roomId = ref.watch(selectedRoomProvider);
     final roomAsync = roomId != null ? ref.watch(loadRoomProvider(roomId)) : null;
 

@@ -560,6 +560,15 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               videoUrl: finalVideoUrl,
                             );
 
+                            // Dialog'u hemen kapat
+                            if (context.mounted) {
+                              context.pop();
+                            }
+                            
+                            // Video controller'ı temizle
+                            newVideoController?.dispose();
+                            
+                            // Görevi güncelle
                             await ref
                                 .read(firestoreControllerProvider.notifier)
                                 .updateTask(
@@ -568,11 +577,8 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                   taskId: widget.task.id,
                                 );
                             
-                            // Video controller'ı temizle
-                            newVideoController?.dispose();
-                            
+                            // Başarı mesajını göster
                             if (context.mounted) {
-                              context.pop();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: const Text(

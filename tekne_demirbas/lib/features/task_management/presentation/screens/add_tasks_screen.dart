@@ -15,6 +15,7 @@ import 'package:tekne_demirbas/features/task_management/presentation/controllers
 import 'package:tekne_demirbas/features/task_management/presentation/firestore_controller.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/providers/boat_type_provider.dart' as boat_provider;
 import 'package:tekne_demirbas/features/task_management/presentation/providers/task_type_provider.dart' as task_provider;
+import 'package:tekne_demirbas/features/task_management/presentation/screens/main_screen.dart';
 
 import 'package:video_player/video_player.dart';
 
@@ -46,6 +47,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   final List<File> _images = [];
   File? _video;
   VideoPlayerController? _videoController;
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -581,7 +583,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: () async {
+                  onTap: _isLoading ? null : () async {
                 // Yetki kontrolü
                 final canAdd = ref.read(canAddTaskProvider);
                 if (!canAdd) {
@@ -619,13 +621,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   return;
                 }
 
-                final description = _descriptionController.text.trim();
-                final taskTypes = ref.read(task_provider.taskTypesProvider).value!;
-                String taskType = taskTypes[_selectedTaskTypeIndex].name;
-                final boatTypes = ref.read(boat_provider.boatTypesProvider).value!;
-                String boatType = boatTypes[_selectedBoatTypeIndex].name;
-                String date = DateTime.now().toString();
-
                 final roomId = ref.read(selectedRoomProvider);
                 if (roomId == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -643,6 +638,19 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   );
                   return;
                 }
+                
+                // Loading başlat
+                setState(() {
+                  _isLoading = true;
+                });
+
+                try {
+                final description = _descriptionController.text.trim();
+                final taskTypes = ref.read(task_provider.taskTypesProvider).value!;
+                String taskType = taskTypes[_selectedTaskTypeIndex].name;
+                final boatTypes = ref.read(boat_provider.boatTypesProvider).value!;
+                String boatType = boatTypes[_selectedBoatTypeIndex].name;
+                String date = DateTime.now().toString();
 
                 final myTask = Task(
                   title: title,
@@ -725,6 +733,10 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
                 // Başarılı mesajı göster ve formu temizle
                 if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                  
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Row(
@@ -760,13 +772,40 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     _videoController?.dispose();
                     _videoController = null;
                   });
+                  
+                  // Görevlerim ekranına (index 0) yönlendir
+                  final tabController = ref.read(tabControllerStateProvider);
+                  if (tabController != null) {
+                    tabController.animateTo(0);
+                  }
+                }
+                } catch (e) {
+                  // Hata durumunda loading'i kapat
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Görev eklenirken hata oluştu: $e',
+                          style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
+                        ),
+                        backgroundColor: Colors.red.shade400,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                        ),
+                      ),
+                    );
+                  }
                 }
                   },
                   borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
                   child: Container(
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(vertical: 18),
-                    child: state.isLoading
+                    child: _isLoading
                         ? const CircularProgressIndicator(color: Appstyles.white)
                         : Row(
                             mainAxisAlignment: MainAxisAlignment.center,
