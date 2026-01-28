@@ -7,6 +7,7 @@ import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart
 import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room_request.dart';
+import 'package:tekne_demirbas/features/room_management/presentation/providers/permission_provider.dart';
 import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/utils/appstyles.dart';
 import 'package:tekne_demirbas/utils/size_config.dart';
@@ -1182,6 +1183,12 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
   Widget _buildRoomSelectionContent(BuildContext context, user) {
     final userRooms = ref.watch(loadUserRoomsProvider(user.uid));
     final userRequests = ref.watch(loadUserRoomRequestsProvider(user.uid));
+    final isAdminAsync = ref.watch(isAdminProvider);
+    final isAdmin = isAdminAsync.when(
+      data: (v) => v,
+      loading: () => false,
+      error: (_, __) => false,
+    );
 
     final selectedRoomId = ref.watch(selectedRoomProvider);
     if (selectedRoomId != null) {
@@ -1230,75 +1237,113 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Butonlar - Üst kısımda ortalanmış
+              // Butonlar - Admin kontrolüne göre gösterilir
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: Appstyles.oceanGradient,
-                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
-                        boxShadow: Appstyles.mediumShadow,
-                      ),
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showCreateRoomDialog(context, user),
-                        icon: const Icon(Icons.add_business, size: 22),
-                        label: Text(
-                          'Oda Oluştur',
-                          style: Appstyles.titleTextStyle.copyWith(
-                            color: Appstyles.white,
-                            fontWeight: FontWeight.w600,
-                          ),
+                  // Oda Oluştur butonu sadece admin için görünür
+                  if (isAdmin) ...[
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: Appstyles.oceanGradient,
+                          borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          boxShadow: Appstyles.mediumShadow,
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                          foregroundColor: Appstyles.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                        child: ElevatedButton.icon(
+                          onPressed: () => _showCreateRoomDialog(context, user),
+                          icon: const Icon(Icons.add_business, size: 22),
+                          label: Text(
+                            'Oda Oluştur',
+                            style: Appstyles.titleTextStyle.copyWith(
+                              color: Appstyles.white,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                          elevation: 0,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
-                        boxShadow: Appstyles.mediumShadow,
-                      ),
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showJoinRoomDialog(context, user),
-                        icon: const Icon(Icons.login, size: 22),
-                        label: Text(
-                          'Odaya Katıl',
-                          style: Appstyles.titleTextStyle.copyWith(
-                            color: Appstyles.white,
-                            fontWeight: FontWeight.w600,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                            foregroundColor: Appstyles.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                            ),
+                            elevation: 0,
                           ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                          foregroundColor: Appstyles.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
-                          ),
-                          elevation: 0,
                         ),
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                  ],
+                  // Odaya Katıl butonu - admin değilse ortalanmış, admin ise yan yana
+                  isAdmin
+                      ? Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              boxShadow: Appstyles.mediumShadow,
+                            ),
+                            child: ElevatedButton.icon(
+                              onPressed: () => _showJoinRoomDialog(context, user),
+                              icon: const Icon(Icons.login, size: 22),
+                              label: Text(
+                                'Odaya Katıl',
+                                style: Appstyles.titleTextStyle.copyWith(
+                                  color: Appstyles.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                                foregroundColor: Appstyles.white,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                                ),
+                                elevation: 0,
+                              ),
+                            ),
+                          ),
+                        )
+                      : Container(
+                          width: MediaQuery.of(context).size.width * 0.6,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                            boxShadow: Appstyles.mediumShadow,
+                          ),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _showJoinRoomDialog(context, user),
+                            icon: const Icon(Icons.login, size: 22),
+                            label: Text(
+                              'Odaya Katıl',
+                              style: Appstyles.titleTextStyle.copyWith(
+                                color: Appstyles.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                              foregroundColor: Appstyles.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                              ),
+                              elevation: 0,
+                            ),
+                          ),
+                        ),
                 ],
               ),
             const SizedBox(height: 32),

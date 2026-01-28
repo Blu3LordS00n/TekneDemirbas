@@ -1,8 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tekne_demirbas/features/authentication/data/auth_repository.dart';
 import 'package:tekne_demirbas/features/room_management/data/room_repository.dart';
 import 'package:tekne_demirbas/features/room_management/domain/permission.dart';
 import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
+
+/// Kullanıcının admin olup olmadığını kontrol eden provider
+/// Firestore'daki users koleksiyonundaki isAdmin alanını okur
+final isAdminProvider = StreamProvider.autoDispose<bool>((ref) {
+  final userAsync = ref.watch(currentUserProvider);
+  final userId = userAsync.value?.uid;
+  
+  if (userId == null) {
+    return Stream.value(false);
+  }
+  
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(userId)
+      .snapshots()
+      .map((doc) {
+        if (!doc.exists) return false;
+        final data = doc.data();
+        return data?['isAdmin'] == true;
+      });
+});
 
 // Seçili oda için kullanıcının permission'ını döndürür
 final currentUserPermissionProvider = StreamProvider.autoDispose<RoomPermission?>((ref) {
