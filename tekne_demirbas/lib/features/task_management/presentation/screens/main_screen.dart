@@ -9,7 +9,6 @@ import 'package:tekne_demirbas/features/room_management/domain/permission.dart';
 import 'package:tekne_demirbas/features/room_management/domain/room.dart';
 import 'package:tekne_demirbas/features/room_management/presentation/providers/selected_room_provider.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/screens/add_tasks_screen.dart';
-import 'package:tekne_demirbas/features/task_management/presentation/screens/all_tasks_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/screens/completed_tasks_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/screens/incomplete_tasks_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/widgets/room_management_dialog.dart';
@@ -48,7 +47,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       setState(() {
         currentIndex = _tabController.index;
@@ -67,13 +66,11 @@ class _MainScreenState extends ConsumerState<MainScreen>
   String _getPageTitle(int index) {
     switch (index) {
       case 0:
-        return 'Görevlerim';
-      case 1:
         return 'Devam Eden';
+      case 1:
+        return 'Tamamlanan';
       case 2:
         return 'Görev Oluştur';
-      case 3:
-        return 'Tamamlanan';
       default:
         return 'Ana Ekran';
     }
@@ -338,10 +335,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
         child: TabBarView(
           controller: _tabController,
           children: const [
-            AllTasksScreen(),
             IncompleteTasksScreen(),
-            AddTasksScreen(),
             CompletedTasksScreen(),
+            AddTasksScreen(),
           ],
         ),
       ),
@@ -370,24 +366,19 @@ class _MainScreenState extends ConsumerState<MainScreen>
           backgroundColor: Appstyles.white,
           items: const [
             BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              label: 'Ana Sayfa',
-              activeIcon: Icon(Icons.home),
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.warning_amber_outlined),
               label: 'Devam Eden',
               activeIcon: Icon(Icons.warning_amber),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.add_circle_outline),
-              label: 'Ekle',
-              activeIcon: Icon(Icons.add_circle),
-            ),
-            BottomNavigationBarItem(
               icon: Icon(Icons.check_circle_outline),
               label: 'Tamamlanan',
               activeIcon: Icon(Icons.check_circle),
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_circle_outline),
+              label: 'Ekle',
+              activeIcon: Icon(Icons.add_circle),
             ),
           ],
         ),

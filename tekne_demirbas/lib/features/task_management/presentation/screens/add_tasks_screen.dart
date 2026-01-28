@@ -773,7 +773,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     _videoController = null;
                   });
                   
-                  // Görevlerim ekranına (index 0) yönlendir
+                  // Devam Eden ekranına (index 0) yönlendir
                   final tabController = ref.read(tabControllerStateProvider);
                   if (tabController != null) {
                     tabController.animateTo(0);
