@@ -194,8 +194,11 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       taskTypeAsync.when(
                         data: (taskTypes) {
                           final taskTypeNames = taskTypes.map((t) => t.name).toList();
+                          final effectiveValue = selectedTaskType ?? '';
+                          final validValues = ['', ...taskTypeNames];
+                          final value = validValues.contains(effectiveValue) ? effectiveValue : '';
                           return DropdownButtonFormField<String>(
-                            value: selectedTaskType,
+                            value: value,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
@@ -204,18 +207,27 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               fillColor: Colors.grey[100],
                               prefixIcon: const Icon(Icons.work),
                             ),
-                            items: taskTypeNames.map((name) {
-                              return DropdownMenuItem(
-                                value: name,
+                            items: [
+                              const DropdownMenuItem(
+                                value: '',
                                 child: Text(
-                                  name,
-                                  style: const TextStyle(color: Colors.black87),
+                                  'İş türü seçme (opsiyonel)',
+                                  style: TextStyle(color: Colors.black87),
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                              ...taskTypeNames.map((name) {
+                                return DropdownMenuItem(
+                                  value: name,
+                                  child: Text(
+                                    name,
+                                    style: const TextStyle(color: Colors.black87),
+                                  ),
+                                );
+                              }),
+                            ],
                             onChanged: (value) {
                               setDialogState(() {
-                                selectedTaskType = value;
+                                selectedTaskType = value ?? '';
                               });
                             },
                           );
@@ -698,12 +710,10 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                     ? widget.task.videoUrl
                                     : null;
 
-                            // Başlığı açıklamaya göre tekrar oluştur (ilk satır / kısa özet)
-                            final firstLine = descriptionText.split('\n').first.trim();
-                            final generatedTitle = firstLine.isEmpty ? descriptionText : firstLine;
-                            final title = generatedTitle.length > 60
-                                ? '${generatedTitle.substring(0, 60).trimRight()}…'
-                                : generatedTitle;
+                            // Başlığı açıklamanın ilk 50 karakteri olarak oluştur
+                            final title = descriptionText.length > 50
+                                ? '${descriptionText.substring(0, 50).trimRight()}…'
+                                : descriptionText;
 
                             final newTask = Task(
                               id: widget.task.id,
@@ -839,13 +849,18 @@ class _TaskItemState extends ConsumerState<TaskItem> {
     showDialog(
       context: context,
       builder: (ctx) {
-          return Dialog(
+        final mq = MediaQuery.of(ctx);
+        final dialogWidth = mq.size.width * 0.92;
+        final maxHeight = mq.size.height * 0.88;
+        return Dialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
           child: Container(
+            width: dialogWidth,
+            constraints: BoxConstraints(maxHeight: maxHeight),
             decoration: BoxDecoration(
               color: Appstyles.white,
               borderRadius: BorderRadius.circular(Appstyles.borderRadiusLarge),
@@ -854,84 +869,160 @@ class _TaskItemState extends ConsumerState<TaskItem> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Başlık
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: Appstyles.oceanGradient,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(Appstyles.borderRadiusLarge),
-                      topRight: Radius.circular(Appstyles.borderRadiusLarge),
+                // Üst bar - sadece kapat
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12, right: 8),
+                    child: IconButton(
+                      icon: const Icon(Icons.close, color: Colors.black54, size: 28),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                    boxShadow: Appstyles.softShadow,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          widget.task.title,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.close, color: Colors.white),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                    ],
                   ),
                 ),
-                
-                // İçerik
+                // İçerik: Açıklama -> Medya -> Etiketler
                 Flexible(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(20),
+                    padding: const EdgeInsets.fromLTRB(28, 0, 28, 28),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Açıklama
+                        // Açıklama (başlık yok, doğrudan metin)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Appstyles.lightGray,
+                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
+                          ),
+                          child: Text(
+                            widget.task.description,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              height: 1.5,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 28),
+                        // Medya - Resimler
+                        if (widget.task.imageUrls.isNotEmpty) ...[
+                          Text(
+                            'Resimler',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 220,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.task.imageUrls.length,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (imgCtx) => Dialog(
+                                        backgroundColor: Colors.transparent,
+                                        child: Stack(
+                                          children: [
+                                            InteractiveViewer(
+                                              child: Image.network(
+                                                widget.task.imageUrls[index],
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                            Positioned(
+                                              top: 0,
+                                              right: 0,
+                                              child: IconButton(
+                                                icon: const Icon(Icons.close, color: Appstyles.white),
+                                                onPressed: () => Navigator.of(imgCtx).pop(),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.only(right: 12),
+                                    width: 220,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                      border: Border.all(color: Appstyles.lightBlue, width: 2),
+                                      boxShadow: Appstyles.softShadow,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                      child: Image.network(
+                                        widget.task.imageUrls[index],
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        // Medya - Video
+                        if (widget.task.videoUrl != null) ...[
+                          Text(
+                            'Video',
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              border: Border.all(color: Appstyles.lightBlue, width: 2),
+                              boxShadow: Appstyles.softShadow,
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                              child: AspectRatio(
+                                aspectRatio: 16 / 9,
+                                child: VideoPlayerWidget(
+                                  videoUrl: widget.task.videoUrl!,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
+                        // Etiketler - en altta
                         Text(
-                          'Açıklama',
+                          'Etiketler',
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 17,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Appstyles.lightGray,
-                            borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                          ),
-                          child: Text(
-                            widget.task.description,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-                        
-                        // Etiketler
                         Wrap(
-                          spacing: 12,
-                          runSpacing: 12,
+                          spacing: 10,
+                          runSpacing: 10,
                           children: [
                             _Tag(
                               text: widget.task.boatType,
                               color: Appstyles.secondaryBlue,
                             ),
-                            _Tag(
-                              text: widget.task.taskType,
-                              color: Appstyles.primaryBlue,
-                            ),
+                            if (widget.task.taskType.isNotEmpty)
+                              _Tag(
+                                text: widget.task.taskType,
+                                color: Appstyles.primaryBlue,
+                              ),
                             Consumer(
                               builder: (context, ref, _) {
                                 final isEmail = widget.task.createdBy.contains('@');
@@ -961,103 +1052,6 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 24),
-                        
-                        // Resimler
-                        if (widget.task.imageUrls.isNotEmpty) ...[
-                          Text(
-                            'Resimler',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          SizedBox(
-                            height: 200,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: widget.task.imageUrls.length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (ctx) => Dialog(
-                                        backgroundColor: Colors.transparent,
-                                        child: Stack(
-                                          children: [
-                                            InteractiveViewer(
-                                              child: Image.network(
-                                                widget.task.imageUrls[index],
-                                                fit: BoxFit.contain,
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: IconButton(
-                                                icon: const Icon(Icons.close, color: Appstyles.white),
-                                                onPressed: () => Navigator.of(ctx).pop(),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.only(right: 12),
-                                    width: 200,
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                                      border: Border.all(color: Appstyles.lightBlue, width: 2),
-                                      boxShadow: Appstyles.softShadow,
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                                      child: Image.network(
-                                        widget.task.imageUrls[index],
-                                        fit: BoxFit.cover,
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                        ],
-                        
-                        // Video
-                        if (widget.task.videoUrl != null) ...[
-                          Text(
-                            'Video',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                              border: Border.all(color: Appstyles.lightBlue, width: 2),
-                              boxShadow: Appstyles.softShadow,
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                              child: AspectRatio(
-                                aspectRatio: 16 / 9,
-                                child: VideoPlayerWidget(
-                                  videoUrl: widget.task.videoUrl!,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
                       ],
                     ),
                   ),
@@ -1257,11 +1251,13 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               text: widget.task.boatType,
                               color: Appstyles.secondaryBlue,
                             ),
-                            const SizedBox(width: 12),
-                            _Tag(
-                              text: widget.task.taskType,
-                              color: Appstyles.primaryBlue,
-                            ),
+                            if (widget.task.taskType.isNotEmpty) ...[
+                              const SizedBox(width: 12),
+                              _Tag(
+                                text: widget.task.taskType,
+                                color: Appstyles.primaryBlue,
+                              ),
+                            ],
                             const SizedBox(width: 15),
                             Consumer(
                               builder: (context, ref, _) {

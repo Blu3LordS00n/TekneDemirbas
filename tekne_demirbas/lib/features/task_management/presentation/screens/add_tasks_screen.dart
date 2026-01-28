@@ -36,9 +36,6 @@ class AddTasksScreen extends ConsumerStatefulWidget {
 class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
   final _descriptionController = TextEditingController();
 
-  // Tekne dropdown'uyla aynı davranış: seçili olan iş türü silinebilsin
-  // (lockedCount=0 => tüm iş türlerinde "Seçili olanı sil" seçeneği görünür)
-  final int _lockedTaskTypeCount = 0;
   int _selectedTaskTypeIndex = 0;
 
   final int _lockedBoatTypeCount = 0;
@@ -327,19 +324,16 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
             taskTypeAsync.when(
               data: (taskTypes) {
-                if (taskTypes.isEmpty) {
-                  return Text(
-                    "Henüz iş türü yok",
-                    style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textLight),
-                  );
-                }
+                const noneOption = "İş türü seçme (opsiyonel)";
                 final names = taskTypes.map((t) => t.name).toList();
+                final items = [noneOption, ...names];
+                final selectedIndex = _selectedTaskTypeIndex.clamp(0, items.length - 1);
 
                 return EditableDropdown(
-                  label: "İş Türü",
-                  items: names,
-                  selectedIndex: _selectedTaskTypeIndex,
-                  lockedCount: _lockedTaskTypeCount,
+                  label: "İş Türü (opsiyonel)",
+                  items: items,
+                  selectedIndex: selectedIndex,
+                  lockedCount: 1,
                   allowAdd: isRoomOwner,
                   allowDelete: isRoomOwner,
 
@@ -347,7 +341,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     setState(() => _selectedTaskTypeIndex = i);
                   },
 
-                  // ➕ EKLE
                   onAddNew: () async {
                     final name = await showAddItemDialog(
                       context: context,
@@ -363,19 +356,17 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     }
                   },
 
-                  // 🗑 SİL (soft delete)
                   onDelete: (i) async {
+                    final idx = i - 1;
+                    if (idx < 0 || idx >= names.length) return;
                     final confirmed = await showConfirmDeleteDialog(
                       context: context,
-                      itemName: names[i],
+                      itemName: names[idx],
                     );
 
                     if (confirmed) {
-                      await taskTypeController.deleteTaskType(taskTypes[i].id);
-
-                      if (_selectedTaskTypeIndex >= i && _selectedTaskTypeIndex > 0) {
-                        setState(() => _selectedTaskTypeIndex--);
-                      }
+                      await taskTypeController.deleteTaskType(taskTypes[idx].id);
+                      setState(() => _selectedTaskTypeIndex = 0);
                     }
                   },
                 );
@@ -625,24 +616,22 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
                 try {
                 final description = _descriptionController.text.trim();
-                final taskTypes = ref.read(task_provider.taskTypesProvider).value;
+                final taskTypes = ref.read(task_provider.taskTypesProvider).value ?? [];
                 final boatTypes = ref.read(boat_provider.boatTypesProvider).value;
 
-                if (taskTypes == null || taskTypes.isEmpty) {
-                  throw StateError('İş türleri yüklenemedi veya boş.');
-                }
                 if (boatTypes == null || boatTypes.isEmpty) {
                   throw StateError('Tekne listesi yüklenemedi veya boş.');
                 }
 
-                final safeTaskTypeIndex =
-                    _selectedTaskTypeIndex.clamp(0, taskTypes.length - 1);
                 final safeBoatTypeIndex =
                     _selectedBoatTypeIndex.clamp(0, boatTypes.length - 1);
-
-                final String taskType = taskTypes[safeTaskTypeIndex].name;
                 final String boatType = boatTypes[safeBoatTypeIndex].name;
-                final String title = '$boatType - $taskType';
+                final String taskType = (_selectedTaskTypeIndex <= 0 || taskTypes.isEmpty)
+                    ? ''
+                    : taskTypes[_selectedTaskTypeIndex - 1].name;
+                final String title = description.length > 50
+                    ? '${description.substring(0, 50).trimRight()}…'
+                    : description;
                 String date = DateTime.now().toString();
 
                 final myTask = Task(
