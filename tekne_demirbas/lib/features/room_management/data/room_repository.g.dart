@@ -551,6 +551,148 @@ final class LoadRoomPermissionsFamily extends $Family
   String toString() => r'loadRoomPermissionsProvider';
 }
 
+@ProviderFor(pendingRoomRequestsCount)
+final pendingRoomRequestsCountProvider = PendingRoomRequestsCountFamily._();
+
+final class PendingRoomRequestsCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
+    with $FutureModifier<int>, $StreamProvider<int> {
+  PendingRoomRequestsCountProvider._({
+    required PendingRoomRequestsCountFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'pendingRoomRequestsCountProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingRoomRequestsCountHash();
+
+  @override
+  String toString() {
+    return r'pendingRoomRequestsCountProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<int> create(Ref ref) {
+    final argument = this.argument as String;
+    return pendingRoomRequestsCount(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is PendingRoomRequestsCountProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$pendingRoomRequestsCountHash() =>
+    r'9335146115c4394be40cd388dd3d327e861cc8d8';
+
+final class PendingRoomRequestsCountFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<int>, String> {
+  PendingRoomRequestsCountFamily._()
+    : super(
+        retry: null,
+        name: r'pendingRoomRequestsCountProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  PendingRoomRequestsCountProvider call(String roomId) =>
+      PendingRoomRequestsCountProvider._(argument: roomId, from: this);
+
+  @override
+  String toString() => r'pendingRoomRequestsCountProvider';
+}
+
+@ProviderFor(loadUserDisplayNameByEmail)
+final loadUserDisplayNameByEmailProvider = LoadUserDisplayNameByEmailFamily._();
+
+final class LoadUserDisplayNameByEmailProvider
+    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
+    with $FutureModifier<String?>, $StreamProvider<String?> {
+  LoadUserDisplayNameByEmailProvider._({
+    required LoadUserDisplayNameByEmailFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'loadUserDisplayNameByEmailProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadUserDisplayNameByEmailHash();
+
+  @override
+  String toString() {
+    return r'loadUserDisplayNameByEmailProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<String?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<String?> create(Ref ref) {
+    final argument = this.argument as String;
+    return loadUserDisplayNameByEmail(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LoadUserDisplayNameByEmailProvider &&
+        other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$loadUserDisplayNameByEmailHash() =>
+    r'7a5d4b1832d3e7575e83567e1e1a4043c2fc4c52';
+
+final class LoadUserDisplayNameByEmailFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<String?>, String> {
+  LoadUserDisplayNameByEmailFamily._()
+    : super(
+        retry: null,
+        name: r'loadUserDisplayNameByEmailProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  LoadUserDisplayNameByEmailProvider call(String email) =>
+      LoadUserDisplayNameByEmailProvider._(argument: email, from: this);
+
+  @override
+  String toString() => r'loadUserDisplayNameByEmailProvider';
+}
+
 @ProviderFor(loadUserDisplayName)
 final loadUserDisplayNameProvider = LoadUserDisplayNameFamily._();
 
@@ -619,148 +761,4 @@ final class LoadUserDisplayNameFamily extends $Family
 
   @override
   String toString() => r'loadUserDisplayNameProvider';
-}
-
-@ProviderFor(loadUserDisplayNameByEmail)
-final loadUserDisplayNameByEmailProvider = LoadUserDisplayNameByEmailFamily._();
-
-final class LoadUserDisplayNameByEmailProvider
-    extends $FunctionalProvider<AsyncValue<String?>, String?, Stream<String?>>
-    with $FutureModifier<String?>, $StreamProvider<String?> {
-  LoadUserDisplayNameByEmailProvider._({
-    required LoadUserDisplayNameByEmailFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'loadUserDisplayNameByEmailProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$loadUserDisplayNameByEmailHash();
-
-  @override
-  String toString() {
-    return r'loadUserDisplayNameByEmailProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $StreamProviderElement<String?> $createElement(
-    $ProviderPointer pointer,
-  ) => $StreamProviderElement(pointer);
-
-  @override
-  Stream<String?> create(Ref ref) {
-    final argument = this.argument as String;
-    return loadUserDisplayNameByEmail(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is LoadUserDisplayNameByEmailProvider &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$loadUserDisplayNameByEmailHash() =>
-    r'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
-
-final class LoadUserDisplayNameByEmailFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<String?>, String> {
-  LoadUserDisplayNameByEmailFamily._()
-    : super(
-        retry: null,
-        name: r'loadUserDisplayNameByEmailProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  LoadUserDisplayNameByEmailProvider call(String email) =>
-      LoadUserDisplayNameByEmailProvider._(argument: email, from: this);
-
-  @override
-  String toString() => r'loadUserDisplayNameByEmailProvider';
-}
-
-@ProviderFor(pendingRoomRequestsCount)
-final pendingRoomRequestsCountProvider = PendingRoomRequestsCountFamily._();
-
-final class PendingRoomRequestsCountProvider
-    extends $FunctionalProvider<AsyncValue<int>, int, Stream<int>>
-    with $FutureModifier<int>, $StreamProvider<int> {
-  PendingRoomRequestsCountProvider._({
-    required PendingRoomRequestsCountFamily super.from,
-    required String super.argument,
-  }) : super(
-         retry: null,
-         name: r'pendingRoomRequestsCountProvider',
-         isAutoDispose: true,
-         dependencies: null,
-         $allTransitiveDependencies: null,
-       );
-
-  @override
-  String debugGetCreateSourceHash() => _$pendingRoomRequestsCountHash();
-
-  @override
-  String toString() {
-    return r'pendingRoomRequestsCountProvider'
-        ''
-        '($argument)';
-  }
-
-  @$internal
-  @override
-  $StreamProviderElement<int> $createElement(
-    $ProviderPointer pointer,
-  ) => $StreamProviderElement(pointer);
-
-  @override
-  Stream<int> create(Ref ref) {
-    final argument = this.argument as String;
-    return pendingRoomRequestsCount(ref, argument);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is PendingRoomRequestsCountProvider &&
-        other.argument == argument;
-  }
-
-  @override
-  int get hashCode {
-    return argument.hashCode;
-  }
-}
-
-String _$pendingRoomRequestsCountHash() =>
-    r'f8a3b2c1d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
-
-final class PendingRoomRequestsCountFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<int>, String> {
-  PendingRoomRequestsCountFamily._()
-    : super(
-        retry: null,
-        name: r'pendingRoomRequestsCountProvider',
-        dependencies: null,
-        $allTransitiveDependencies: null,
-        isAutoDispose: true,
-      );
-
-  PendingRoomRequestsCountProvider call(String roomId) =>
-      PendingRoomRequestsCountProvider._(argument: roomId, from: this);
-
-  @override
-  String toString() => r'pendingRoomRequestsCountProvider';
 }

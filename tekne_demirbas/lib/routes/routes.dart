@@ -5,13 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:tekne_demirbas/features/authentication/presentation/screens/register_screen.dart';
 import 'package:tekne_demirbas/features/authentication/presentation/screens/sign_in_screen.dart';
+import 'package:tekne_demirbas/features/authentication/presentation/screens/splash_screen.dart';
 import 'package:tekne_demirbas/features/room_management/presentation/screens/room_selection_screen.dart';
 import 'package:tekne_demirbas/features/task_management/presentation/screens/main_screen.dart';
 import 'package:tekne_demirbas/routes/go_router_refresh_stream.dart';
 
 part 'routes.g.dart';
 
-enum AppRoutes { roomSelection, main, signIn, register }
+enum AppRoutes { splash, roomSelection, main, signIn, register }
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
   return FirebaseAuth.instance;
@@ -21,12 +22,18 @@ final firebaseAuthProvider = Provider<FirebaseAuth>((ref) {
 GoRouter goRouter(Ref ref) {
   final firebaseAuth = ref.watch(firebaseAuthProvider);
   return GoRouter(
-    initialLocation: '/roomSelection',
+    initialLocation: '/splash',
     debugLogDiagnostics: true,
     redirect: (ctx, state) {
+      final currentPath = state.uri.toString();
+      
+      // Splash screen'den redirect yapma
+      if (currentPath == '/splash') {
+        return null;
+      }
+
       final isLoggedIn = firebaseAuth.currentUser != null;
       final isEmailVerified = firebaseAuth.currentUser?.emailVerified ?? false;
-      final currentPath = state.uri.toString();
 
       // Email doğrulanmamış kullanıcı giriş yapamaz
       if (isLoggedIn && !isEmailVerified && 
@@ -46,6 +53,11 @@ GoRouter goRouter(Ref ref) {
     },
     refreshListenable: GoRouterRefreshStream(firebaseAuth.authStateChanges()),
     routes: [
+      GoRoute(
+        path: '/splash',
+        name: AppRoutes.splash.name,
+        builder: (cxt, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: '/roomSelection',
         name: AppRoutes.roomSelection.name,

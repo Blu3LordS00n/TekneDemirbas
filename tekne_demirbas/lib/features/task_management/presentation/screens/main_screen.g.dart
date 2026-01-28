@@ -15,15 +15,15 @@ final tabControllerStateProvider = TabControllerStateProvider._();
 final class TabControllerStateProvider
     extends $NotifierProvider<TabControllerState, TabController?> {
   TabControllerStateProvider._()
-      : super(
-          from: null,
-          argument: null,
-          retry: null,
-          name: r'tabControllerStateProvider',
-          isAutoDispose: true,
-          dependencies: null,
-          $allTransitiveDependencies: null,
-        );
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'tabControllerStateProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
 
   @override
   String debugGetCreateSourceHash() => _$tabControllerStateHash();
@@ -31,10 +31,18 @@ final class TabControllerStateProvider
   @$internal
   @override
   TabControllerState create() => TabControllerState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(TabController? value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<TabController?>(value),
+    );
+  }
 }
 
 String _$tabControllerStateHash() =>
-    r'4a8b3c2d1e9f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2';
+    r'e9f5b2b7e86bd11cc6fcffb1cad4a3bca12f2c0b';
 
 abstract class _$TabControllerState extends $Notifier<TabController?> {
   TabController? build();

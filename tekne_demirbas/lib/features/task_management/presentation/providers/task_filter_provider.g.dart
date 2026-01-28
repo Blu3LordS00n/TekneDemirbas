@@ -42,7 +42,7 @@ final class TaskFilterControllerProvider
 }
 
 String _$taskFilterControllerHash() =>
-    r'024b206b29410d09bfa93d0d34b9482d9f5e031d';
+    r'fda178b2fee0386be14c26a26ff16ab281c256ca';
 
 abstract class _$TaskFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -95,7 +95,7 @@ final class AllTasksFilterControllerProvider
 }
 
 String _$allTasksFilterControllerHash() =>
-    r'f8bb020d4d62c99d23fa17e7be8b0ee1917a90da';
+    r'b3e30b805f217d5d0584d3d5f091122c436207b3';
 
 abstract class _$AllTasksFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -149,7 +149,7 @@ final class CompletedTasksFilterControllerProvider
 }
 
 String _$completedTasksFilterControllerHash() =>
-    r'5b43740f72cb4bc85a369a4538682c2092df4f2b';
+    r'f3d640f15b12da4f382bb0b4e3ea50ea647de9cd';
 
 abstract class _$CompletedTasksFilterController extends $Notifier<TaskFilter> {
   TaskFilter build();
@@ -204,7 +204,7 @@ final class IncompletedTasksFilterControllerProvider
 }
 
 String _$incompletedTasksFilterControllerHash() =>
-    r'fea52681161b40789078ed0301d351563a717c02';
+    r'a883fba91b2fae64f9a405fbca08a68a6dc63fc7';
 
 abstract class _$IncompletedTasksFilterController
     extends $Notifier<TaskFilter> {
