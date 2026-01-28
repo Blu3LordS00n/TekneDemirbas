@@ -18,7 +18,8 @@ class FilterBar extends ConsumerWidget {
     final filter = ref.watch(filterControllerProvider);
 
     return Padding(
-      padding: const EdgeInsets.all(12),
+      // Daha dar ve üst/alt boşluğu daha az
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Container(
@@ -41,21 +42,22 @@ class FilterBar extends ConsumerWidget {
               },
               borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                // Butonun iç yüksekliğini ve genişliğini azalt
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(
                       Icons.filter_list,
                       color: Appstyles.white,
-                      size: 22,
+                      size: 20,
                     ),
                     const SizedBox(width: 10),
                     const Text(
                       "Filtrele",
                       style: TextStyle(
                         color: Appstyles.white,
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: FontWeight.w600,
                       ),
                     ),

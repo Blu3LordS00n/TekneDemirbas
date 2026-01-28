@@ -35,6 +35,8 @@ class _TaskItemState extends ConsumerState<TaskItem> {
     String? selectedTaskType = widget.task.taskType;
     
     // Medya için state değişkenleri
+    final List<String> existingImageUrls = List<String>.from(widget.task.imageUrls);
+    String? existingVideoUrl = widget.task.videoUrl;
     final List<File> newImages = [];
     File? newVideo;
     VideoPlayerController? newVideoController;
@@ -345,6 +347,122 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           ),
                         ],
                       ),
+
+                      // Mevcut resimler (URL) - kaldırma seçeneği
+                      if (existingImageUrls.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Mevcut Fotoğraflar',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        SizedBox(
+                          height: 100,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: existingImageUrls.length,
+                            itemBuilder: (context, index) {
+                              final url = existingImageUrls[index];
+                              return Stack(
+                                children: [
+                                  Container(
+                                    margin: const EdgeInsets.all(8),
+                                    width: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Appstyles.lightBlue, width: 1.5),
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.network(
+                                        url,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) => Container(
+                                          color: Appstyles.lightGray,
+                                          child: const Icon(Icons.broken_image, color: Colors.grey),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    right: 4,
+                                    top: 4,
+                                    child: GestureDetector(
+                                      onTap: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Fotoğrafı kaldır?'),
+                                            content: const Text(
+                                              'Bu fotoğraf görevden kaldırılacak ve güncelle dediğinizde depolamadan (Storage) da silinecek.',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(ctx).pop(false),
+                                                child: const Text('İptal'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () => Navigator.of(ctx).pop(true),
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                                child: const Text('Sil', style: TextStyle(color: Colors.white)),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          setDialogState(() {
+                                            existingImageUrls.removeAt(index);
+                                          });
+                                        }
+                                      },
+                                      child: const CircleAvatar(
+                                        radius: 12,
+                                        backgroundColor: Colors.red,
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 14,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+
+                      // Mevcut video (URL) - kaldırma seçeneği
+                      if (existingVideoUrl != null) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                'Mevcut Video',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setDialogState(() {
+                                  existingVideoUrl = null;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
                       
                       // Yeni eklenen resimler
                       if (newImages.isNotEmpty)
@@ -371,10 +489,32 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                     right: 4,
                                     top: 4,
                                     child: GestureDetector(
-                                      onTap: () {
-                                        setDialogState(() {
-                                          newImages.removeAt(index);
-                                        });
+                                      onTap: () async {
+                                        final confirm = await showDialog<bool>(
+                                          context: context,
+                                          builder: (ctx) => AlertDialog(
+                                            title: const Text('Fotoğrafı kaldır?'),
+                                            content: const Text(
+                                              'Bu fotoğraf görevden kaldırılacak.',
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () => Navigator.of(ctx).pop(false),
+                                                child: const Text('İptal'),
+                                              ),
+                                              ElevatedButton(
+                                                onPressed: () => Navigator.of(ctx).pop(true),
+                                                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                                                child: const Text('Sil', style: TextStyle(color: Colors.white)),
+                                              ),
+                                            ],
+                                          ),
+                                        );
+                                        if (confirm == true) {
+                                          setDialogState(() {
+                                            newImages.removeAt(index);
+                                          });
+                                        }
                                       },
                                       child: const CircleAvatar(
                                         radius: 12,
@@ -461,11 +601,12 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             if (canEdit)
                               ElevatedButton(
                           onPressed: () async {
-                            if (titleController.text.trim().isEmpty) {
+                            final descriptionText = descriptionController.text.trim();
+                            if (descriptionText.isEmpty) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                           content: const Text(
-                            'Görev adı boş olamaz',
+                            'Görev açıklaması boş olamaz',
                             style: TextStyle(color: Colors.white),
                           ),
                                   backgroundColor: Colors.red.shade400,
@@ -477,6 +618,11 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                               );
                               return;
                             }
+
+                            // Silinen medyaları tespit et (mevcutlardan kaldırılanlar)
+                            final deletedImageUrls = widget.task.imageUrls
+                                .where((url) => !existingImageUrls.contains(url))
+                                .toList();
 
                             // Medya varsa yükle
                             List<String>? newImageUrls;
@@ -536,20 +682,33 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                             }
                             
                             // Mevcut medya URL'lerini al ve yeni medyalarla birleştir
-                            List<String> finalImageUrls = List<String>.from(widget.task.imageUrls ?? []);
+                            List<String> finalImageUrls = List<String>.from(existingImageUrls);
                             if (newImageUrls != null) {
                               finalImageUrls.addAll(newImageUrls);
                             }
                             
-                            String? finalVideoUrl = widget.task.videoUrl;
+                            String? finalVideoUrl = existingVideoUrl;
                             if (newVideoUrl != null) {
                               finalVideoUrl = newVideoUrl;
                             }
 
+                            // Video değiştiyse (silindiyse veya yenisi yüklendiyse) eskiyi sil
+                            final String? deletedVideoUrl =
+                                (widget.task.videoUrl != null && widget.task.videoUrl != finalVideoUrl)
+                                    ? widget.task.videoUrl
+                                    : null;
+
+                            // Başlığı açıklamaya göre tekrar oluştur (ilk satır / kısa özet)
+                            final firstLine = descriptionText.split('\n').first.trim();
+                            final generatedTitle = firstLine.isEmpty ? descriptionText : firstLine;
+                            final title = generatedTitle.length > 60
+                                ? '${generatedTitle.substring(0, 60).trimRight()}…'
+                                : generatedTitle;
+
                             final newTask = Task(
                               id: widget.task.id,
-                              title: titleController.text.trim(),
-                              description: descriptionController.text.trim(),
+                              title: title,
+                              description: descriptionText,
                               taskType: selectedTaskType ?? widget.task.taskType,
                               boatType: selectedBoatType ?? widget.task.boatType,
                               createdBy: widget.task.createdBy,
@@ -575,6 +734,8 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                   task: newTask,
                                   userId: widget.task.createdBy,
                                   taskId: widget.task.id,
+                                  deletedImageUrls: deletedImageUrls,
+                                  deletedVideoUrl: deletedVideoUrl,
                                 );
                             
                             // Başarı mesajını göster
@@ -916,8 +1077,8 @@ class _TaskItemState extends ConsumerState<TaskItem> {
     return GestureDetector(
       onTap: _showTaskDetail,
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Appstyles.borderRadiusMedium),
           gradient: widget.task.isComplete 
@@ -942,79 +1103,76 @@ class _TaskItemState extends ConsumerState<TaskItem> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // Sağ üstte tarih, altında title + 3 nokta
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(
-                      child: Text(
-                        widget.task.title,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: _DateTimeTag(dateTime: widget.task.dateTime, color: Appstyles.darkBlue),
                     ),
-                    _DateTimeTag(dateTime: widget.task.dateTime, color: Appstyles.darkBlue),
-                  ],
-                ),
+                    const SizedBox(height: 4),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            widget.task.title,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.black87,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Consumer(
+                          builder: (context, ref, _) {
+                            final canEdit = ref.watch(canEditTaskProvider);
+                            final canDelete = ref.watch(canDeleteTaskProvider);
 
-                SizedBox(height: SizeConfig.getProportionateHeight(6)),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () {}, // Parent GestureDetector'ın event'ini durdur
-                      child: Transform.scale(
-                        scale: 1.3,
-                        child: Checkbox(
-                          value: widget.task.isComplete,
-                          activeColor: Appstyles.secondaryBlue,
-                          checkColor: Appstyles.white,
-                          onChanged: (bool? value) {
-                            if (value == null) return;
-                            
-                            // Görev düzenleme yetkisi kontrolü (görev ekleme veya düzenleme yetkisi olmayan sadece görüntüleyebilir)
-                            final canEdit = ref.read(canEditTaskProvider);
-                            if (!canEdit) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text(
-                                    'Görev durumunu değiştirme yetkiniz yok. Sadece görüntüleme yetkiniz var.',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                  backgroundColor: Colors.red.shade400,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                                  ),
-                                ),
-                              );
-                              return;
+                            if (!canEdit && !canDelete) {
+                              return const SizedBox.shrink();
                             }
 
-                            ref
-                                .read(firestoreRepositoryProvider)
-                                .updateTaskCompletion(
-                                  taskId: widget.task.id,
-                                  isComplete: value,
-                                );
+                            return PopupMenuButton<String>(
+                              icon: const Icon(Icons.more_vert, color: Appstyles.primaryBlue),
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  _editTask();
+                                } else if (value == 'delete') {
+                                  _showDeleteConfirmation();
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                if (canEdit)
+                                  const PopupMenuItem(
+                                    value: 'edit',
+                                    child: Text('Düzenle'),
+                                  ),
+                                if (canDelete)
+                                  const PopupMenuItem(
+                                    value: 'delete',
+                                    child: Text('Sil'),
+                                  ),
+                              ],
+                            );
                           },
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
+
+                SizedBox(height: SizeConfig.getProportionateHeight(8)),
 
                 // Medya Preview
                 if (widget.task.imageUrls.isNotEmpty || widget.task.videoUrl != null) ...[
-                  SizedBox(height: SizeConfig.getProportionateHeight(12)),
+                  SizedBox(height: SizeConfig.getProportionateHeight(8)),
                   SizedBox(
-                    height: 60,
+                    height: 48,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: (widget.task.imageUrls.length) + (widget.task.videoUrl != null ? 1 : 0),
@@ -1023,7 +1181,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                         if (widget.task.videoUrl != null && index == widget.task.imageUrls.length) {
                           return Container(
                             margin: const EdgeInsets.only(right: 8),
-                            width: 60,
+                            width: 48,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
                               border: Border.all(color: Appstyles.lightBlue, width: 1.5),
@@ -1048,7 +1206,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                         // Resim göster
                         return Container(
                           margin: const EdgeInsets.only(right: 8),
-                          width: 60,
+                          width: 48,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
                             border: Border.all(color: Appstyles.lightBlue, width: 1.5),
@@ -1086,8 +1244,6 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                     ),
                   ),
                 ],
-
-                SizedBox(height: SizeConfig.getProportionateHeight(12)),
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1136,31 +1292,44 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                       ),
                     ),
 
-                    // Permission kontrolü: Edit veya Delete yetkisi varsa göster
                     Consumer(
                       builder: (context, ref, _) {
                         final canEdit = ref.watch(canEditTaskProvider);
-                        final canDelete = ref.watch(canDeleteTaskProvider);
-                        
-                        if (!canEdit && !canDelete) {
-                          return const SizedBox.shrink();
-                        }
-                        
+
                         return GestureDetector(
-                          onTap: canEdit ? _editTask : null,
-                          child: Container(
-                            height: SizeConfig.getProportionateHeight(40),
-                            width: SizeConfig.getProportionateHeight(40),
-                            decoration: BoxDecoration(
-                              gradient: canEdit ? Appstyles.oceanGradient : null,
-                              color: canEdit ? null : Appstyles.textLight,
-                              shape: BoxShape.circle,
-                              boxShadow: Appstyles.softShadow,
-                            ),
-                            child: const Icon(
-                              Icons.edit,
-                              color: Appstyles.white,
-                              size: 20.0,
+                          behavior: HitTestBehavior.opaque,
+                          onTap: () {}, // Parent GestureDetector'ın event'ini durdur
+                          child: Transform.scale(
+                            scale: 2.0,
+                            child: Checkbox(
+                              value: widget.task.isComplete,
+                              activeColor: Appstyles.secondaryBlue,
+                              checkColor: Appstyles.white,
+                              onChanged: (bool? value) {
+                                if (value == null) return;
+
+                                if (!canEdit) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: const Text(
+                                        'Görev durumunu değiştirme yetkiniz yok. Sadece görüntüleme yetkiniz var.',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                      backgroundColor: Colors.red.shade400,
+                                      behavior: SnackBarBehavior.floating,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                                      ),
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                ref.read(firestoreRepositoryProvider).updateTaskCompletion(
+                                      taskId: widget.task.id,
+                                      isComplete: value,
+                                    );
+                              },
                             ),
                           ),
                         );
@@ -1223,8 +1392,7 @@ class _DateTimeTag extends StatelessWidget {
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
 
-    final dateText = '$day/$month/$year';
-    final timeText = '$hour:$minute';
+    final dateTimeText = '$day/$month/$year $hour:$minute';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -1232,29 +1400,14 @@ class _DateTimeTag extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            dateText,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            timeText,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              height: 1.1,
-            ),
-          ),
-        ],
+      child: Text(
+        dateTimeText,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 11,
+          fontWeight: FontWeight.w600,
+          height: 1.1,
+        ),
       ),
     );
   }

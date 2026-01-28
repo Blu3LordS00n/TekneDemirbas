@@ -58,17 +58,38 @@ class FirestoreController extends _$FirestoreController {
     required Task task,
     required String userId,
     required String taskId,
+    List<String> deletedImageUrls = const [],
+    String? deletedVideoUrl,
   }) async {
     state = const AsyncLoading();
     final fireStoreRepository = ref.read(firestoreRepositoryProvider);
+    final storageRepository = ref.read(storageRepositoryProvider);
 
-    state = await AsyncValue.guard(
-      () => fireStoreRepository.updateTask(
+    state = await AsyncValue.guard(() async {
+      // Önce Firestore'u güncelle (DB güncellemesi başarısız olursa dosya silmeyelim)
+      await fireStoreRepository.updateTask(
         task: task,
         taskId: taskId,
         userId: userId,
-      ),
-    );
+      );
+
+      // Sonra Storage'dan kaldırılan medyaları best-effort sil
+      final urlsToDelete = <String>{
+        ...deletedImageUrls,
+        if (deletedVideoUrl != null && deletedVideoUrl!.isNotEmpty) deletedVideoUrl!,
+      };
+
+      for (final url in urlsToDelete) {
+        try {
+          await storageRepository.deleteFile(url);
+        } catch (e) {
+          // Storage silme hatası güncelleme işlemini durdurmaz
+          // Loglama yapılabilir
+          // ignore: avoid_print
+          print('Storage dosyası silinirken hata: $e');
+        }
+      }
+    });
   }
 
   Future<void> deleteTask({required String taskId}) async {

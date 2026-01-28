@@ -43,7 +43,6 @@ class AccountScreen extends ConsumerWidget {
             const Icon(Icons.account_circle, color: Colors.blueGrey, size: 80),
 
             Text(currentUser.email!),
-            Text(currentUser.uid),
             SizedBox(height: SizeConfig.getProportionateHeight(20)),
             InkWell(
               onTap: () {

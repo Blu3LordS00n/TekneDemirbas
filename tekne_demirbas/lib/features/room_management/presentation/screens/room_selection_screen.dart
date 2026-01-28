@@ -551,8 +551,6 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
                               _buildEditableNameRow(context, ref, user.uid, displayName ?? ''),
                               const SizedBox(height: 20),
                               _buildInfoRow('Email', user.email ?? 'Email yok'),
-                              const SizedBox(height: 16),
-                              _buildInfoRow('UID', user.uid),
                             ],
                           ),
                           loading: () => const Center(child: CircularProgressIndicator()),

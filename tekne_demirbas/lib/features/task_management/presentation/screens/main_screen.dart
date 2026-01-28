@@ -509,8 +509,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
                       _buildEditableNameRow(context, ref, currentUser.uid, displayName ?? ''),
                       const SizedBox(height: 16),
                       _buildInfoRow('Email', currentUser.email ?? 'Email yok'),
-                      const SizedBox(height: 12),
-                      _buildInfoRow('UID', currentUser.uid),
                     ],
                   ),
                   loading: () => const Center(child: CircularProgressIndicator()),
