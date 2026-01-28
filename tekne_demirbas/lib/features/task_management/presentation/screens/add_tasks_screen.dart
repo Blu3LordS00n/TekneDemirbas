@@ -34,10 +34,11 @@ class AddTasksScreen extends ConsumerStatefulWidget {
 }
 
 class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
-  final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  final int _lockedTaskTypeCount = 4;
+  // Tekne dropdown'uyla aynı davranış: seçili olan iş türü silinebilsin
+  // (lockedCount=0 => tüm iş türlerinde "Seçili olanı sil" seçeneği görünür)
+  final int _lockedTaskTypeCount = 0;
   int _selectedTaskTypeIndex = 0;
 
   final int _lockedBoatTypeCount = 0;
@@ -51,7 +52,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
     _descriptionController.dispose();
     _videoController?.dispose();
     super.dispose();
@@ -195,6 +195,7 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
     
     // Görev ekleme yetkisi kontrolü
     final canAddTask = ref.watch(canAddTaskProvider);
+    final isRoomOwner = ref.watch(isRoomOwnerProvider);
 
     final boatTypeAsync = ref.watch(boat_provider.boatTypesProvider);
     final boatController = ref.read(boatTypeControllerProvider.notifier);
@@ -265,86 +266,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TitleDescription(
-              title: 'Görev Adı',
-              prefixIcon: Icons.notes,
-              hintText: 'Görev adı gir',
-              maxLines: 1,
-              controller: _titleController,
-            ),
-            const SizedBox(height: 10),
-            TitleDescription(
-              title: 'Görev Tanımı',
-              prefixIcon: Icons.notes,
-              hintText: 'Görev tanımı gir',
-              maxLines: 3,
-              controller: _descriptionController,
-            ),
-            const SizedBox(height: 20),
-
-            taskTypeAsync.when(
-              data: (taskTypes) {
-                if (taskTypes.isEmpty) {
-                  return Text(
-                    "Henüz iş türü yok",
-                    style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textLight),
-                  );
-                }
-                final names = taskTypes.map((t) => t.name).toList();
-
-                return EditableDropdown(
-                  label: "İş Türü",
-                  items: names,
-                  selectedIndex: _selectedTaskTypeIndex,
-                  lockedCount: _lockedTaskTypeCount,
-
-                  onChanged: (i) {
-                    setState(() => _selectedTaskTypeIndex = i);
-                  },
-
-                  // ➕ EKLE
-                  onAddNew: () async {
-                    final name = await showAddItemDialog(
-                      context: context,
-                      title: "Yeni İş Türü",
-                      hint: "İş Türü Adı",
-                    );
-
-                    if (name != null && name.trim().isNotEmpty) {
-                      await taskTypeController.addTaskType(name.trim());
-                      setState(() {
-                        _selectedTaskTypeIndex = names.length;
-                      });
-                    }
-                  },
-
-                  // 🗑 SİL (soft delete)
-                  onDelete: (i) async {
-                    final confirmed = await showConfirmDeleteDialog(
-                      context: context,
-                      itemName: names[i],
-                    );
-
-                    if (confirmed) {
-                      await taskTypeController.deleteTaskType(taskTypes[i].id);
-
-                      if (_selectedTaskTypeIndex >= i &&
-                          _selectedTaskTypeIndex > 0) {
-                        setState(() => _selectedTaskTypeIndex--);
-                      }
-                    }
-                  },
-                );
-              },
-              loading: () => const CircularProgressIndicator(),
-              error: (e, stackTrace) => Text(
-                "Hata: $e\n\nStack: $stackTrace",
-                style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
-              ),
-            ),
-
-            SizedBox(height: SizeConfig.getProportionateHeight(5)),
-
             boatTypeAsync.when(
               data: (boats) {
                 final names = boats.map((b) => b.name).toList();
@@ -354,6 +275,8 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   items: names,
                   selectedIndex: _selectedBoatTypeIndex,
                   lockedCount: 0,
+                  allowAdd: isRoomOwner,
+                  allowDelete: isRoomOwner,
 
                   onChanged: (i) {
                     setState(() => _selectedBoatTypeIndex = i);
@@ -398,6 +321,80 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                 "Hata: $e",
                 style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
               ),
+            ),
+
+            SizedBox(height: SizeConfig.getProportionateHeight(12)),
+
+            taskTypeAsync.when(
+              data: (taskTypes) {
+                if (taskTypes.isEmpty) {
+                  return Text(
+                    "Henüz iş türü yok",
+                    style: Appstyles.normalTextStyle.copyWith(color: Appstyles.textLight),
+                  );
+                }
+                final names = taskTypes.map((t) => t.name).toList();
+
+                return EditableDropdown(
+                  label: "İş Türü",
+                  items: names,
+                  selectedIndex: _selectedTaskTypeIndex,
+                  lockedCount: _lockedTaskTypeCount,
+                  allowAdd: isRoomOwner,
+                  allowDelete: isRoomOwner,
+
+                  onChanged: (i) {
+                    setState(() => _selectedTaskTypeIndex = i);
+                  },
+
+                  // ➕ EKLE
+                  onAddNew: () async {
+                    final name = await showAddItemDialog(
+                      context: context,
+                      title: "Yeni İş Türü",
+                      hint: "İş Türü Adı",
+                    );
+
+                    if (name != null && name.trim().isNotEmpty) {
+                      await taskTypeController.addTaskType(name.trim());
+                      setState(() {
+                        _selectedTaskTypeIndex = names.length;
+                      });
+                    }
+                  },
+
+                  // 🗑 SİL (soft delete)
+                  onDelete: (i) async {
+                    final confirmed = await showConfirmDeleteDialog(
+                      context: context,
+                      itemName: names[i],
+                    );
+
+                    if (confirmed) {
+                      await taskTypeController.deleteTaskType(taskTypes[i].id);
+
+                      if (_selectedTaskTypeIndex >= i && _selectedTaskTypeIndex > 0) {
+                        setState(() => _selectedTaskTypeIndex--);
+                      }
+                    }
+                  },
+                );
+              },
+              loading: () => const CircularProgressIndicator(),
+              error: (e, stackTrace) => Text(
+                "Hata: $e\n\nStack: $stackTrace",
+                style: Appstyles.normalTextStyle.copyWith(color: Colors.red),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            TitleDescription(
+              title: 'Görev Tanımı',
+              prefixIcon: Icons.notes,
+              hintText: 'Görev tanımı gir',
+              maxLines: 3,
+              controller: _descriptionController,
             ),
 
             SizedBox(height: SizeConfig.getProportionateHeight(20)),
@@ -602,24 +599,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                   );
                   return;
                 }
-                
-                final title = _titleController.text.trim();
-                if (title.isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        'Görev adı boş olamaz',
-                        style: Appstyles.normalTextStyle.copyWith(color: Appstyles.white),
-                      ),
-                      backgroundColor: Colors.red.shade400,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                      ),
-                    ),
-                  );
-                  return;
-                }
 
                 final roomId = ref.read(selectedRoomProvider);
                 if (roomId == null) {
@@ -646,10 +625,24 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
 
                 try {
                 final description = _descriptionController.text.trim();
-                final taskTypes = ref.read(task_provider.taskTypesProvider).value!;
-                String taskType = taskTypes[_selectedTaskTypeIndex].name;
-                final boatTypes = ref.read(boat_provider.boatTypesProvider).value!;
-                String boatType = boatTypes[_selectedBoatTypeIndex].name;
+                final taskTypes = ref.read(task_provider.taskTypesProvider).value;
+                final boatTypes = ref.read(boat_provider.boatTypesProvider).value;
+
+                if (taskTypes == null || taskTypes.isEmpty) {
+                  throw StateError('İş türleri yüklenemedi veya boş.');
+                }
+                if (boatTypes == null || boatTypes.isEmpty) {
+                  throw StateError('Tekne listesi yüklenemedi veya boş.');
+                }
+
+                final safeTaskTypeIndex =
+                    _selectedTaskTypeIndex.clamp(0, taskTypes.length - 1);
+                final safeBoatTypeIndex =
+                    _selectedBoatTypeIndex.clamp(0, boatTypes.length - 1);
+
+                final String taskType = taskTypes[safeTaskTypeIndex].name;
+                final String boatType = boatTypes[safeBoatTypeIndex].name;
+                final String title = '$boatType - $taskType';
                 String date = DateTime.now().toString();
 
                 final myTask = Task(
@@ -764,7 +757,6 @@ class _AddTasksScreenState extends ConsumerState<AddTasksScreen> {
                     ),
                   );
                   
-                  _titleController.clear();
                   _descriptionController.clear();
                   setState(() {
                     _images.clear();

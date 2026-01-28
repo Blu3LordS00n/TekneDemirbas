@@ -12,6 +12,8 @@ class EditableDropdown extends StatelessWidget {
     required this.onChanged,
     required this.onAddNew,
     required this.onDelete,
+    this.allowAdd = true,
+    this.allowDelete = true,
   });
 
   final String label;
@@ -22,6 +24,8 @@ class EditableDropdown extends StatelessWidget {
   final void Function(int index) onChanged;
   final VoidCallback onAddNew;
   final void Function(int index) onDelete;
+  final bool allowAdd;
+  final bool allowDelete;
 
   @override
   Widget build(BuildContext context) {
@@ -98,31 +102,32 @@ class EditableDropdown extends StatelessWidget {
                     ),
                   ),
 
-                DropdownMenuItem(
-                  value: -1,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
-                      ),
-                      borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.add, color: Appstyles.white),
-                        SizedBox(width: 8),
-                        Text(
-                          "Yeni ekle",
-                          style: TextStyle(color: Appstyles.white, fontWeight: FontWeight.w600),
+                if (allowAdd)
+                  DropdownMenuItem(
+                    value: -1,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [Appstyles.secondaryBlue, Appstyles.primaryBlue],
                         ),
-                      ],
+                        borderRadius: BorderRadius.circular(Appstyles.borderRadiusSmall),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.add, color: Appstyles.white),
+                          SizedBox(width: 8),
+                          Text(
+                            "Yeni ekle",
+                            style: TextStyle(color: Appstyles.white, fontWeight: FontWeight.w600),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
 
-                if (selectedIndex >= lockedCount)
+                if (allowDelete && selectedIndex >= lockedCount)
                   DropdownMenuItem(
                     value: -2,
                     child: Container(

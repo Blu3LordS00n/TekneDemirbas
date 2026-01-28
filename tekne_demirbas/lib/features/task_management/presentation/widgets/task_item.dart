@@ -793,10 +793,7 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                                 );
                               },
                             ),
-                            _Tag(
-                              text: widget.task.formattedDate,
-                              color: Appstyles.darkBlue,
-                            ),
+                            _DateTimeTag(dateTime: widget.task.dateTime, color: Appstyles.darkBlue),
                             _Tag(
                               text: widget.task.isComplete ? 'Tamamlandı' : 'Devam Ediyor',
                               color: widget.task.isComplete ? Appstyles.secondaryBlue : Colors.red.shade300,
@@ -956,28 +953,19 @@ class _TaskItemState extends ConsumerState<TaskItem> {
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,
                         ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    _Tag(text: widget.task.formattedDate, color: Appstyles.darkBlue),
-                  ],
-                ),
-
-                SizedBox(height: SizeConfig.getProportionateHeight(10)),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        widget.task.description,
-                        style: const TextStyle(
-                          color: Colors.black54,
-                        ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
+                    _DateTimeTag(dateTime: widget.task.dateTime, color: Appstyles.darkBlue),
+                  ],
+                ),
 
+                SizedBox(height: SizeConfig.getProportionateHeight(6)),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () {}, // Parent GestureDetector'ın event'ini durdur
@@ -1211,6 +1199,62 @@ class _Tag extends StatelessWidget {
           fontSize: 12,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+}
+
+class _DateTimeTag extends StatelessWidget {
+  const _DateTimeTag({super.key, required this.dateTime, required this.color});
+
+  final DateTime? dateTime;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final dt = dateTime;
+    if (dt == null) {
+      return _Tag(text: '', color: color);
+    }
+
+    final day = dt.day.toString().padLeft(2, '0');
+    final month = dt.month.toString().padLeft(2, '0');
+    final year = dt.year.toString();
+    final hour = dt.hour.toString().padLeft(2, '0');
+    final minute = dt.minute.toString().padLeft(2, '0');
+
+    final dateText = '$day/$month/$year';
+    final timeText = '$hour:$minute';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            dateText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              height: 1.1,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            timeText,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              height: 1.1,
+            ),
+          ),
+        ],
       ),
     );
   }

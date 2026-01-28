@@ -61,3 +61,19 @@ final canViewTasksProvider = Provider.autoDispose<bool>((ref) {
     error: (_, __) => false,
   );
 });
+
+/// Sadece oda sahibine özel işlemler için kontrol.
+final isRoomOwnerProvider = Provider.autoDispose<bool>((ref) {
+  final userAsync = ref.watch(currentUserProvider);
+  final userId = userAsync.value?.uid;
+  final roomId = ref.watch(selectedRoomProvider);
+
+  if (userId == null || roomId == null) return false;
+
+  final roomAsync = ref.watch(loadRoomProvider(roomId));
+  return roomAsync.when(
+    data: (room) => room?.ownerId == userId,
+    loading: () => false,
+    error: (_, __) => false,
+  );
+});
