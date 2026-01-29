@@ -1201,6 +1201,30 @@ class _RoomSelectionScreenState extends ConsumerState<RoomSelectionScreen> {
       );
     }
 
+    // Admin olmayan + en az 1 odaya katılmış → oda seçimi atla, direkt main (Devam Eden)
+    final rooms = userRooms.when<List<Room>?>(
+      data: (r) => r,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+    final isAdminValue = isAdminAsync.when<bool?>(
+      data: (b) => b,
+      loading: () => null,
+      error: (_, __) => null,
+    );
+    if (rooms != null &&
+        isAdminValue != null &&
+        !isAdminValue &&
+        rooms.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(selectedRoomProvider.notifier).setRoom(rooms.first.id);
+        context.go('/main');
+      });
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Appstyles.lightGray,
       appBar: AppBar(
